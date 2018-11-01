@@ -85,12 +85,12 @@
 %
 We describe an abstract model of social choice consisting of a metric induced by edit operations on a set of elements.  As in the continuous Spatial Model, in our discrete metric space each voter specifies an ideal element in the set and voters prefer elements that are closer to them.
 We study properties of our model that are sufficient for rendering a simple hill-climbing algorithm to be Condorcet consistent.
-We explore instances of our abstract model for various social choice settings, including single-winner elections, multiwinner elections, participatory budgeting, and participatory legislation, studying the complexity of finding Condorcet winners in each of them and comparing the resulting aggregation method to known social choice methods.
+We explore instances of our abstract model for various social choice settings, including single-winner elections, multiwinner elections, participatory budgeting, and participatory legislation, studying the complexity of finding Condorcet winners in each of them and comparing the resulting aggregation method to known aggregation methods.
 %
 \end{abstract}
 
 
-\keywords{spatial social choice; multiwinner elections; participatory budgeting; participatory legislation}
+\keywords{social choice; single-winner elections; multiwinner elections; participatory budgeting; participatory legislation}
 
 
 \maketitle
@@ -98,28 +98,51 @@ We explore instances of our abstract model for various social choice settings, i
 
 \section{Introduction}
 
-There are various models of social choice,
-concentrated on aggregating various types of objects.
-For example, the most basic social choice setting is single-winner election, in which voter preferences over a given set of alternatives are aggregated to identify one winning alternative. More complex social choice settings include, e.g., multiwinner elections, in which such voter preferences are aggregated to select a winning committee, which is a subset of the alternatives, and participatory budgeting, in which costs are associated with the alternatives, and a bundle whose total cost does not go over some given budget limit is to be selected by aggregating the voter preferences.
-There are even some less standard social choice settings, such as graph aggregation, in which graphs are aggregated, and participatory legislation, in which text drafts are aggregated.
+Various models of social choice exists,
+corresponding to aggregation tasks of different objects.
+For example, the most basic social choice setting consists of a single-winner election, in which voter preferences over a given set of alternatives are aggregated to decide upon a single winning alternative.
+More complex social choice settings include, e.g., multiwinner elections, in which voter preferences are aggregated to select a winning committee--a subset of the alternatives, usually of some given size;
+participatory budgeting, in which costs are associated with alternatives--usually referred to as items or projects--and a bundle whose total cost does not go over some given budget limit is the output of the aggregation method used. Further, less known social choice settings, such as graph aggregation, in which graphs are aggregated, and participatory legislation, in which text drafts are aggregated, also exist.
 
-While it is possible and fruitful to develop distinct theories for each of those social choice settings and aggregation tasks, here we aim at suggesting one general framework which can be instantiated in various ways to capture all these settings, or at least many of them.
-That is, we wish to develop a single social choice theory which is general enough to be able to capture many of these scenarios, while being particular enough so to be useful in finding efficient aggregation methods to be used in each of them.
+It is usually fruitful to develop distinct mathematical foundations and social choice theories for each social choice setting separately.
+Here, however, we aim at studying a general framework of social choice which can capture many of these settings at once.
+In particular, our overarching goal is to develop a model which is general enough to be able to capture many scenarios of social choice,
+while being particular enough to be useful in helping designing aggregation methods that can be used efficiently for each of these settings.
 
-Our framework, described formally below, consists of two ingredients:
-  An element space $D$, which is some, possibly infinite, set of possible outcomes of the aggregation process;
-  and a set $E$ of edit operations, each can be applied on a single element from $D$ and changes the element slightly to arrive at a different element in $D$.
-Furthermore, in our framework, each voter specifies a single element from $D$ as her ideal point, which is understood as her most-preferred element. Then we use the fact that the set $E$ defines a metric over the elements of $D$ to infer a ranking of each voter over all the elements of $D$ such that a voter prefers an element which is closer to her ideal point than another element which is farther away (i.e., requires a more expensive application of the edit operations).
+Our model is related to the spatial model, in that we consider ideal points of voters and infer voter preferences using an underlying metric space,
+but is slightly more specific than the usual model of metric preferences as we consider sets of edit operations which transform ideal points and define the underlying metric.
+Specifically, our model, described formally below, consists of two ingredients:
+  (1) a \emph{ground set} $D$, which can be infinite, and contain all possible outcomes of the aggregation process
+  and
+  (2) a set $E$ of \emph{edit operations}, each of which can be applied to any element of $D$ and results in transforming the element to a different element in $D$.
+Given these two ingredients, we associate each voter with a single element of $D$, referred to as the voter \emph{ideal point}, and understood as her most-preferred element from $D$.
+Then we use the fact that the set $E$ defines a metric over the elements of $D$ to infer, for each voter, a ranking over all the elements of $D$, by assuming that a voter prefers closer elements to elements which are farther away from her ideal point (i.e., from elements which require more expensive applications of edit operations).
 
-Given some element space $D$ and $n$ ideal points in it, representing $n$ voters, we can aggregate those $n$ ideal points based on the ranking assumed which follows the metric caused by the set of edit operations. Indeed, while there might be many aggregation methods, here we concentrate on Condorcet-consistent aggregation methods:
-  That is, we generalize the Condorcet principle and aim at designing efficient aggregation methods which find a Condorcet-winning element, which is an element such that there is no voter majority to replace it with another element, whenever one exists.
+Given some element space $D$ and $n$ ideal points in it, representing $n$ voters, we are interested in aggregating the $n$ inferred rankings. Specifically, we concentrate on Condorcet-consistent aggregation methods:
+  That is, we apply the Condorcet principle to our setting and aim at designing efficient aggregation methods which find a Condorcet-winning element,
+  which is an element such that there is no voter majority to replace it with another element, whenever one exists.
+We show that, if certain conditions hold on the set $D$ and the set of edit operations $E$,
+then a simple, efficient hill-climbing algorithm which we describe is Condorcet-consistent.
   
-We instantiate our general edit-based model of social choice in various domains:
+We instantiate our general edit-based model of social choice in various settings of social choice,
+by defining, for each such setting, what is the ground set $D$ and what is the set of edit operations $E$.
+We then check whether the sufficient conditions which guarantee the existence of a polynomial-time Condorcet-consistent aggregation method exist,
+and investigate the meaning of being Condorcet consistent in each of the settings we consider.
+Specifically, we consider the following settings:
   (1) Single-winner elections, in which we show that Plurality is the only Condorcet-consistent voting rule;
-  (2) Single-winner election in a one dimensional Euclidean domain, in which we show that the Median is the only Condorcet-consistent voting rule;
-  (3) Participatory bundget..
-  and (4) \nimrod{WE ARE HERE..}
+  (2) Single-winner elections over a one-dimensional Euclidean issue space, in which we show that the Median is the only Condorcet-consistent voting rule;
+  (3) Multiwinner elections, in which we show that Bloc is the only Condorcet-consistent voting rule;
+  (4) Various variants of participatory budgeting;
+  and (5) Participatory legislation, in which the task is the aggregate text drafts into one common draft.
 
+
+\subsection{Related Work}
+
+\nimrod{Need some about spatial model}
+
+\nimrod{Need some about distance rationalization and Lirong's general model}
+
+\nimrod{The specific related work for each application will be in the respective sections}
 
 
 \section{Metric Preferences based on Edit Operations}
