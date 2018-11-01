@@ -38,6 +38,7 @@
 
 
 \newcommand{\calD}{\mathcal{D}}
+\newcommand{\calE}{\mathcal{E}}
 \newcommand{\calS}{\mathcal{S}}
 \newcommand{\calT}{\mathcal{T}}
 
@@ -112,20 +113,22 @@ while being particular enough to be useful in helping designing aggregation meth
 Our model is related to the spatial model, in that we consider ideal points of voters and infer voter preferences using an underlying metric space,
 but is slightly more specific than the usual model of metric preferences as we consider sets of edit operations which transform ideal points and define the underlying metric.
 Specifically, our model, described formally below, consists of two ingredients:
-  (1) a \emph{ground set} $D$, which can be infinite, and contain all possible outcomes of the aggregation process
+  (1) a ground set, which can be infinite, and contain all possible outcomes of the aggregation process
   and
-  (2) a set $E$ of \emph{edit operations}, each of which can be applied to any element of $D$ and results in transforming the element to a different element in $D$.
-Given these two ingredients, we associate each voter with a single element of $D$, referred to as the voter \emph{ideal point}, and understood as her most-preferred element from $D$.
-Then we use the fact that the set $E$ defines a metric over the elements of $D$ to infer, for each voter, a ranking over all the elements of $D$, by assuming that a voter prefers closer elements to elements which are farther away from her ideal point (i.e., from elements which require more expensive applications of edit operations).
+  (2) a set edit operations, each of which can be applied to any element of the ground set and results in transforming the element to a different element in the ground set.
+Given these two ingredients, we associate each voter with a single element of the ground set, referred to as the voter ideal point, and understood as her most-preferred element from the ground set.
+Then we use the fact that the set of edit operations defines a metric over the elements of the ground set to infer, for each voter, a ranking over all the elements of the ground set,
+by assuming that a voter prefers closer elements to elements which are farther away from her ideal point (i.e., from elements which require more expensive applications of edit operations).
 
-Given some element space $D$ and $n$ ideal points in it, representing $n$ voters, we are interested in aggregating the $n$ inferred rankings. Specifically, we concentrate on Condorcet-consistent aggregation methods:
+Given some ground set and some ideal points in it, representing some voters, we are interested in aggregating the corresponding inferred rankings of the voters.
+Specifically, we concentrate on Condorcet-consistent aggregation methods:
   That is, we apply the Condorcet principle to our setting and aim at designing efficient aggregation methods which find a Condorcet-winning element,
   which is an element such that there is no voter majority to replace it with another element, whenever one exists.
-We show that, if certain conditions hold on the set $D$ and the set of edit operations $E$,
+We show that, if certain conditions hold on the ground set and the set of edit operations,
 then a simple, efficient hill-climbing algorithm which we describe is Condorcet-consistent.
   
 We instantiate our general edit-based model of social choice in various settings of social choice,
-by defining, for each such setting, what is the ground set $D$ and what is the set of edit operations $E$.
+by defining, for each such setting, a concrete ground set and a concrete set of edit operations.
 We then check whether the sufficient conditions which guarantee the existence of a polynomial-time Condorcet-consistent aggregation method exist,
 and investigate the meaning of being Condorcet consistent in each of the settings we consider.
 Specifically, we consider the following settings:
@@ -145,64 +148,66 @@ Specifically, we consider the following settings:
 \nimrod{The specific related work for each application will be in the respective sections}
 
 
-\section{Metric Preferences based on Edit Operations}
+\section{Formal Model}
 
-We consider social choice under metric preferences, specifically such in which the metric preferences are defined via sets of edit operations.
-In our general model, we assume some state space in which the alternatives reside:
-  E.g., in committee elections this is the space of all possible committees, and in legislation this is the space of all possible text drafts.
-We assume that each voter has her ideal point in the space and we study the aggregation problem of identifying a good element of the space which would correspond to the voter ideal points.
+In this section we formally describe our model. In later sections we instantiate it to few specific social choice settings.
 
-As voters do not provide us with ranking over the whole state space, we infer such a ranking by considering various sets of edit operations which define a metric over the elements of the state space, and get the ranking of the voters in this way.
-
-Then, assuming such metric preferences which are based on edit operations, we aim at finding a Condorcet winner, which is an element of the state space with no voter majority in favor of changing it; as we are considering metric preferences, this means that there is no other element of the state space for which there is a voter majority whose ideal points are closer to another element than the Condorcet winner.
-
-We spell certain conditions on the edit operations which guarantee the existence of a Condorcet winner and a way to find it using a hill-climbing algorithm. We then demonstrate how to embed (1) committee elections (2) line budgeting and (3) legislation, within this framework.
-
-
-\section{Formal General Model}
-
-In this section we consider state spaces, edit operations, and implicit voting with ideal points abstractly, without specifying the specific structure of the elements of the state space or the specific edit operations which define the metric underlying their assumed rankings.
+\mypara{Ground sets and edit operations}
 %
-In the following sections we instantiate this general model by considering committee elections, line budgeting, and legislation.
+The first ingredient of our model is a possibly infinite \emph{ground set} $\calD$.
+Each element $d \in \calD$ of the ground set is a possible outcomes of the aggregation process.
+The second ingredient of our model is a set of \emph{edit operations} $\calE$.
+Each edit operation $e \in \calE$ is a function $e : \calD \to \calD$ which transforms an element of the ground set to another element of the ground set.
+Each edit operation $e$ is also associated with a cost, $\cost(e) > 0$.
+This cost is additive, so for any $\calE' \subset \calE$, it holds that $\cost(\calE') = \sum_{e \in \calE'} \cost(e)$.
+The element resulting from applying an edit operation $e \in \calE$ on some $d \in \calD$ is denoted by $e(d)$.
+These edit operations are used to define the edit-distance metric between each two elements of the ground set $d, d' \in \calD$,
+denoted by $\dist(d, d')$, which is defined to be the minimal cost $\sum_{i \in [n]} \cost(e_i)$ of any finite sequence of edit operations $e_1, e_2, \ldots e_n$, $n \ge 0$, that convert $d$ to $d'$;
+such that $e_n(\ldots(e_2(e_1(d)))\ldots) = d'$.\footnote{%
+In fact, the function $\dist$ is formally a quasimetric (i.e., a asymmetric metric):
+  (1) $\dist(d, d') \geq 0$ for each $d, d' \in \calD$, as $\cost(e) > 0$ for each $e \in \calE$;
+  (2) $\dist(d, d') = 0$ if and only if $d = d'$, again as $\cost(e) > 0$ for each $e \in \calE$;
+  and
+  (3) $\dist(d, d'') \leq \dist(d, d') + \dist(d', d'')$ for each $d, d', d'' \in \calD$, as one can apply edit operations to transform $d$ to $d'$ and then transform the resulting $d'$ to $d''$.
+We do not formally require that symmetry holds (i.e., $\dist(d, d')$ might not be equal to $\dist(d', d)$.}
 
-Besides spelling out the model specifics, the main value of this section is in the exposition of two properties which some sets of edit operations have.  We show that these properties have implications on the computational complexity of identifying Condorcet winners.
-Specifically, we develop a simple hill-climbing algorithm that  finds a Condorcet winner if these two properties hold.
+\mypara{Voters, ideal points, and inferred weak orders}
 %
-As we show next, in the instances of the general model of committee elections, line budgeting, and legislation, these properties do hold.
+Besides such a ground set $\calD$ and a set of edit operations $\calE$,
+we assume $n$ voters, where voter $i$ corresponds to an element $v_i$ of the ground set $\calD$.
+Similarly to the jargon used in the spatial model of elections, this element is referred to as the \emph{ideal point} of voter $i$.
+Correspondingly, the assumed meaning of these ideal points is that the ideal point $d_i$ of voter $i$ is her most-preferred element of the ground set;
+i.e., each voter wishes that her ideal point would be elected by the aggregation method used.
+%
+Furthermore, for each voter, we infer a ranking over all elements of the ground set $\calD$ following the metric induced via the edit operations $\calE$.
+Specifically, let $v_i$ be the ideal point of voter $i$, and let $d, d' \in \calD$ be two elements of the ground set.
+Then, we say that voter $i$ \emph{prefers} element $d$ to element $d'$ if $\dist(v_i, d) < \dist(v_i, d')$.
+In this way we infer a weak order for each voter; notice that this weak order is infinite whenever $\calD$ is infinite.
+Slightly abusing notation, we also refer to the weak order of voter $i$ as $v_i$,
+where it will be clear from the context whether we speak of the ideal point $v_i$ of voter $i$ or on her inferred weak order $v_i$.
 
-\begin{definition}
+\mypara{Condorcet winners and Condorcet consistency}
 %
-We assume a potentially infinite set of \emph{elements}, $\calD$, and a given set of \emph{edit operations} on them, $E: \calD \rightarrow \calD$. Each edit operation $e \in E$ has a \emph{cost}, $\cost(e) > 0$,  which is additive, so for any $E' \subset E$, $\cost(E') = \sum_{e \in E'} \cost(e)$. The element resulting from applying an edit operation $e \in E$ on $c \in \calD$ is denoted by $e(c)$.  The \emph{edit distance} between two elements $c, c' \in \calD$, $\dist(c, c')$, is the minimal cost $\sum_{i \in [n]} \cost(e_i)$ of any finite sequence of edit operations $e_1, e_2, \ldots e_n$, $n \ge 0$, that convert $c$  to $c'$, $e_n(\ldots(e_2(e_1(c)))\ldots) = c'$.\qqed  
-%
-\end{definition}
+In this work we are interested in identifying Condorcet winners.
+In our setting, the Condorcet principle means the following.
 
-We assume a given election, where the alternatives on vote are all the elements in the state space. Each voter merely specifies an element of the state space as her ideal point. We understand the ideal point of a voter as her most preferred element of the state space. Then, we infer her ranking over all elements of the state space by the metric defined via the edit operations.
-
-\begin{definition}[Prefers]\label{lemma:prefers}
+\begin{definition}[Condorcet winners]
 %
-Let $d, c, c' \in \calD$ be drafts.  We say that  $d$ \emph{prefers}  $c$ to $c'$, $ c \prefers{d} c'$, if $\dist(d, c) < \dist(d, c')$.\qqed
-\end{definition}
-
-In this work we are interested in identifying a Condorcet-winner giving the set of ideal points of the voters.
-%
-A Condorcet-winner of a state space, with respect to a set of ideal points of the voters, is an element $c$ of the state space such that for any other element $c'$, there is a voter majority which prefers $c$ over $c'$.
-
-\begin{definition}[Condorcet-winner]\label{lemma:condorcet-winner}
-%
-Let $D \subset \calD$ be the ideal points of the voters. An element $c \in \calD$ is a \emph{Condorcet-winner} of $D$ if, for any other element $c' \in \calD$:  $|\{ d \in D : c \prefers{d} c' \}| > |\{ d \in D : c' \prefers{d} c \}|$.
-%
-\end{definition}
-
-Then we can apply the Condorcet criterion to our setting.
-
-\begin{definition}[Condorcet-consistency]
-%
-A voting process is \emph{Condorcet-consistent} if it elects a Condorcet-winner whenever such exists.
+Let $\calD$ be a ground set $\calD$ and let $\calE$ be a set of edit operations.
+Let $V = \{v_1, \ldots, v_n\}$ be a set of weak orders over $\calD$ inferred by the metric induced by $\calE$ from ideal points of $n$ voters.
+An element $c \in \calD$ is a \emph{Condorcet winner} of $\calD$ if,
+for any other element $c' \in \calD$:  $|\{ d \in D : c \prefers{d} c' \}| > |\{ d \in D : c' \prefers{d} c \}|$.
 %
 \end{definition}
 
+That is,
+a Condorcet-winner is an element $c$ of the ground set such that there is no other element $d$ of the ground set such that more voter ideal points are closer to $d$ than to $c$.
 
-\section{A Hill-climbing Aggregation Algorithm}
+As we are interested in describing and studying aggregation methods,
+we say that an aggregation method is \emph{Condorcet consistent} if it elects a Condorcet winner whenever such exists.
+
+
+\section{A Simple Hill Climbing Algorithm}
 
 Next we describe a simple aggregation algorithm. 
 The algorithm maintains a current element, which can be initialized arbitrarily. Then, in each iteration it looks for an edit operation which, if done on the current element, would result in another element for which there is a voter majority which prefers it over the current element. 
