@@ -358,23 +358,23 @@ Lemma~\ref{lemma:IIAV-epsilon-condorcet} implies that it returns a Condorcet win
 
 We are ready to consider several instantiations of the general model to specific social choice settings.
 In this section we consider two variants of single-winner elections and describe their corresponding instantiations of the general model.
-We first describe the specific instantiation,
-by defining the ground set $\calD$ and the set of edit operations $\calE$.
-Then we show that, for these $\calD$ and $\calE$,
-indeed closeness under inversion and freeness from local maxima indeed holds,
-thus we conclude that the hill climbing algorithm is a Condorcet consistent aggregation algorithm from this setting.
-Finally, we investigate its operation in this setting and observe that it is equal to the Plurality rule.
+For each variant,
+we first describe the specific instantiation,
+by specifying the ground set $\calD$ and the set of edit operations $\calE$.
+For both instantiations we show that closeness under inversion and freeness from local maxima indeed hold,
+thus we conclude that the hill climbing algorithm is a Condorcet consistent aggregation algorithm for these instantiations.
+Finally, we show that Condorcet aggregation for the first instantiation is the Plurality rule while for the second instantiation it is the Median rule.
 
 
 \subsection{General Single-winner Elections}
 
 Here we consider the standard, general model of single-winner elections and describe an instantiation of our general model to it.
-
-
-\subsubsection{Instantiation}
-
 The standard model of single-winner elections consists of a set of alternatives and a set of voters with preferences the task is to aggregate voter preferences over these alternatives.
 The task is to aggregate these preferences and select one alternative is a winner.
+
+
+\mypara{Instantiation}
+%
 As the set of possible outcomes of a single-winner election is exactly $A$, in our instantiation of the general model to this setting we let $\calD = A$.
 In particular, it means that a voter ideal points can be viewed as her most-preferred alternative.
 
@@ -386,8 +386,8 @@ thus we consider the following basic set of edit operations $\calE$:
 That is, for any ideal point $d \in \calD$, applying $swap_a$ on $d$ results in changing $d$ to become $a$.
 
 
-\subsubsection{Properties}
-
+\mypara{Properties}
+%
 For this instantiation, both properties hold.
 
 \begin{lemma}
@@ -442,41 +442,83 @@ where in each iteration its current element is an alternative with a higher Plur
 \end{remark}
 
 
-\section{One-dimensional Domains}
+\subsection{Single-winner Elections on a Discrete Line}
 
-Here we consider a different social choice task and frame it within our model. Consider again a single-winner election, but now where there is some axis on which the alternatives exist. For concreteness, consider a state space which is $\mathbb{N}$, that is, the natural numbers. Then, each voter has an ideal point which is a natural number. The set $E$ of edit operations might be:
-  (1) unit cost operation of $inc(d)$, which increases the value of the element $d$ by $1$;
+Here we again consider single-winner elections but such in which there is an axis on which the alternatives exist.
+For concreteness, consider the possible alternatives to be $\mathbb{Z}$.
+The task again is to aggregate voter preferences on the alternatives and select one alternative, that is, one integer, as a winner.
+
+
+\mypara{Instantiation}
+%
+We define the ground set to be $\calD = \mathbb{Z}$.
+Following the Euclidean structure of the alternatives,
+we define the following edit operations of $\calE$:
+  (1) we have a unit cost operation $inc$, such that $inc(d) = d + 1$ for each $d \in \calD$,
   and
-  (2) the unit cost operation of $dec(d)$, which decreases the value of the element $d$ by $1$.
+  (2) we have a unit cost operation $dec$, such that $dec(d) = d - 1$ for each $d \in \calD$.
 
-As before, first we consider the two properties of $E$.
+
+\mypara{Properties}
+
+As before, first we consider the two properties.
 
 \begin{lemma}
-  This $E$ is closed under inversion and free of local maxima.
+  For this instantiation, both closeness under inversion and freemess from local maxima hold.
 \end{lemma}
 
 \begin{proof}
 %
-Closed under inversion because $inc(dec(d)) = d$ and $dec(inc(d)) = d$.
+Closed under inversion because $inc(dec(d)) = d$ and $dec(inc(d)) = d$ for each $d \in \calD$.
 
-Free of local maxima holds as if $d$ is not Condorcet winner then the Condorcet winner is either larger (as a natural number) or smaller. If it is larger than there is majority approval for $inc(d)$ and if it is smaller than for $dec(d)$.
+Freeness from local maxima holds as if some $d \in \calD$ is not a Condorcet winner then there are two options (given that there is a Condorcet winner):
+  Either the Condorcet winner $c$ is larger than $d$ or it is smaller than $d$.
+Without loss of generality, assume that $c > d$.
+As $c$ is a Condorcet winner, in particular there is voter majority which prefer $d - 1$ over $d$.
+This means that there is a majority of voter ideal points which are at least $d$.
+The claim follows by noticing that these voters prefer $d + 1$ to $d$.
 %
 \end{proof}
 
-So, we have the following.
+By Corollary~\ref{corollary:main}, we conclude the following.
 
 \begin{corollary}
-  For this setting, the hill climbing algorithm is Condorcet consistent.
+  For this instantiation, the hill climbing algorithm is Condorcet consistent.
 \end{corollary}
 
-So what is our method for this setting? It is the median! It selects the median of the ideal points.
-It is interesting also because the median is strategyproof.
-This also shows that important distinction between maximizing the social welfare and our Condorcet definition:
-  using our Condorcet definition we get the median here, where by maximizing the social welfare we would have got the average.
+
+\mypara{Condorcet Aggregation}
+%
+As might be guessed from the proof above, in this instantiation, our method selects the median.
 
 \begin{observation}
-  For this setting, our method selects the Median.
+  For this instantiation, Condorcet aggregation equals the Median rule.
 \end{observation}
+
+\begin{proof}
+%
+For this instantiation, voter $i$ provides an integer $a \in \mathbb{Z}$ as her ideal point,
+and, following the edit operations of $\calE$, the inferred weak order $v_i$ for voter $i$ whose ideal point is $a$ is such that it prefers some integer $b_1$ to another integer $b_2$
+if and only if $|a - b_1| < |a - b_2|$.
+Consider the median $p$ of this election,
+namely the integer which sits in the middle of the voter ideal points,
+and consider some other element of the ground set $d \neq p$.
+Without loss of generality, $d < p$,
+and then all the $n / 2$ voters whose ideal points are at least as large as $p$ would prefer $p$ to $d$.
+It follows that $p$ is a Condorcet winner.
+%
+\end{proof}
+
+\begin{remark}
+%
+Notice first that this example demonstrates that our Condorcet aggregation is not equal to maximizing social welfare:
+  An aggregation algorithm aiming at maximizing social welfare would select the average of the ideal points,
+  while we select the median.
+
+We also mention that, while selecting the average would not be strategyproof,
+selecting the median, as our Condorcet aggregation does, is strategyproof.
+%
+\end{remark}
 
 
 \section{Committee Elections with Variable number of winners}
