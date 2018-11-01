@@ -1,0 +1,1883 @@
+\let\origvec\vec
+\documentclass{llncs}
+\let\springervec\vec
+\let\vec\origvec
+\usepackage{amsmath}
+
+\widowpenalty10000
+\clubpenalty10000
+
+\usepackage{xcolor}
+\usepackage{amsfonts}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\newtheorem{observation}{Observation}
+%\theoremstyle{definition}
+\newtheorem{algorithm}{Algorithm}
+
+\let\definition\relax % undefine the environment
+\spnewtheorem{definition}{Definition}{\bfseries}{\rmfamily}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\mypara}[1]{\smallskip\noindent\textbf{#1.}}
+\newcommand{\smallpara}[1]{\smallskip\noindent\textbf{#1.}}
+\newcommand{\journal}[1]{\textcolor{purple}{Journal says: #1}}
+\newcommand{\nimrod}[1]{\textcolor{purple}{Nimrod says: #1}}
+\newcommand{\udi}[1]{\textcolor{orange}{Udi says: #1}}
+\newcommand{\nil}{\Lambda}
+\newcommand{\gal}[1]{\textcolor{blue}{Gal says: #1}}
+\newcommand{\qqed}{\hfill$\square$}
+
+\newcommand{\attests}[3]{\emph{attests}_${#1}(#2,#3)\hfill$\square$}
+
+
+\newcommand{\calD}{\mathcal{D}}
+\newcommand{\calS}{\mathcal{S}}
+\newcommand{\calT}{\mathcal{T}}
+
+\newcommand{\iinsert}[1]{\emph{insert}_{#1}}
+\newcommand{\ddelete}[1]{\emph{delete}_{#1}}
+\newcommand{\permute}[1]{\emph{permute}_{#1}}
+
+
+\newcommand{\add}[1]{\emph{add}_{#1}}
+\newcommand{\subtract}[1]{\emph{subtract}_{#1}}
+
+\newcommand{\prefers}[1]{\succ_{#1}}
+
+\newcommand{\pref}{\succ}
+\newcommand{\dist}{\emph{dist}}
+\newcommand{\cost}{\emph{cost}}
+
+
+\newcommand{\calB}{\mathcal{B}}
+\newcommand{\calN}{\mathcal{N}}
+
+
+\newcommand{\iti}{{\it i}}
+\newcommand{\itii}{{\it ii}}
+\newcommand{\itiii}{{\it iii}}
+\newcommand{\itiv}{{\it iv}}
+\newcommand{\itv}{{\it v}}
+
+
+\title{Condorcet Aggregation over Edit-Distance Metric Spaces with Applications to Elections, Budgeting, and Legislation}
+
+
+\author{
+  Ehud Shapiro\inst{1}
+  \and
+  Nimrod Talmon\inst{2}
+}
+
+
+\institute{
+  Weizmann Institute of Science \\ \url{ehud.shapiro@weizmann.ac.il}
+  \and
+  Ben-Gurion University \\ \url{talmonn@bgu.ac.il}
+}
+
+
+
+\begin{document}
+
+
+\pagestyle{plain}
+
+
+\maketitle
+
+
+\begin{abstract}
+%
+We describe an abstract model of social choice consisting of a metric induced by edit operations on a set of elements.  As in the continuous Spatial Model, in our discrete metric space each voter specifies an ideal element in the set and voters prefer elements that are closer to them.
+We study properties of our model that are sufficient for rendering a simple hill-climbing algorithm to be Condorcet consistent.
+We explore instances of our abstract model for various social choice settings, including single-winner elections, multiwinner elections, participatory budgeting, and participatory legislation, studying the complexity of finding Condorcet winners in each of them and comparing the resulting aggregation method to known social choice methods.
+%
+\end{abstract}
+
+
+\section{Introduction}
+
+There are various models of social choice,
+concentrated on aggregating various types of objects.
+For example, the most basic social choice setting is single-winner election, in which voter preferences over a given set of alternatives are aggregated to identify one winning alternative. More complex social choice settings include, e.g., multiwinner elections, in which such voter preferences are aggregated to select a winning committee, which is a subset of the alternatives, and participatory budgeting, in which costs are associated with the alternatives, and a bundle whose total cost does not go over some given budget limit is to be selected by aggregating the voter preferences.
+There are even some less standard social choice settings, such as graph aggregation, in which graphs are aggregated, and participatory legislation, in which text drafts are aggregated.
+
+While it is possible and fruitful to develop distinct theories for each of those social choice settings and aggregation tasks, here we aim at suggesting one general framework which can be instantiated in various ways to capture all these settings, or at least many of them.
+That is, we wish to develop a single social choice theory which is general enough to be able to capture many of these scenarios, while being particular enough so to be useful in finding efficient aggregation methods to be used in each of them.
+
+Our framework, described formally below, consists of two ingredients:
+  An element space $D$, which is some, possibly infinite, set of possible outcomes of the aggregation process;
+  and a set $E$ of edit operations, each can be applied on a single element from $D$ and changes the element slightly to arrive at a different element in $D$.
+Furthermore, in our framework, each voter specifies a single element from $D$ as her ideal point, which is understood as her most-preferred element. Then we use the fact that the set $E$ defines a metric over the elements of $D$ to infer a ranking of each voter over all the elements of $D$ such that a voter prefers an element which is closer to her ideal point than another element which is farther away (i.e., requires a more expensive application of the edit operations).
+
+Given some element space $D$ and $n$ ideal points in it, representing $n$ voters, we can aggregate those $n$ ideal points based on the ranking assumed which follows the metric caused by the set of edit operations. Indeed, while there might be many aggregation methods, here we concentrate on Condorcet-consistent aggregation methods:
+  That is, we generalize the Condorcet principle and aim at designing efficient aggregation methods which find a Condorcet-winning element, which is an element such that there is no voter majority to replace it with another element, whenever one exists.
+  
+We instantiate our general edit-based model of social choice in various domains:
+  (1) Single-winner elections, in which we show that Plurality is the only Condorcet-consistent voting rule;
+  (2) Single-winner election in a one dimensional Euclidean domain, in which we show that the Median is the only Condorcet-consistent voting rule;
+  (3) Participatory bundget..
+  and (4) \nimrod{WE ARE HERE..}
+
+
+
+\section{Metric Preferences based on Edit Operations}
+
+We consider social choice under metric preferences, specifically such in which the metric preferences are defined via sets of edit operations.
+In our general model, we assume some state space in which the alternatives reside:
+  E.g., in committee elections this is the space of all possible committees, and in legislation this is the space of all possible text drafts.
+We assume that each voter has her ideal point in the space and we study the aggregation problem of identifying a good element of the space which would correspond to the voter ideal points.
+
+As voters do not provide us with ranking over the whole state space, we infer such a ranking by considering various sets of edit operations which define a metric over the elements of the state space, and get the ranking of the voters in this way.
+
+Then, assuming such metric preferences which are based on edit operations, we aim at finding a Condorcet winner, which is an element of the state space with no voter majority in favor of changing it; as we are considering metric preferences, this means that there is no other element of the state space for which there is a voter majority whose ideal points are closer to another element than the Condorcet winner.
+
+We spell certain conditions on the edit operations which guarantee the existence of a Condorcet winner and a way to find it using a hill-climbing algorithm. We then demonstrate how to embed (1) committee elections (2) line budgeting and (3) legislation, within this framework.
+
+
+\section{Formal General Model}
+
+In this section we consider state spaces, edit operations, and implicit voting with ideal points abstractly, without specifying the specific structure of the elements of the state space or the specific edit operations which define the metric underlying their assumed rankings.
+%
+In the following sections we instantiate this general model by considering committee elections, line budgeting, and legislation.
+
+Besides spelling out the model specifics, the main value of this section is in the exposition of two properties which some sets of edit operations have.  We show that these properties have implications on the computational complexity of identifying Condorcet winners.
+Specifically, we develop a simple hill-climbing algorithm that  finds a Condorcet winner if these two properties hold.
+%
+As we show next, in the instances of the general model of committee elections, line budgeting, and legislation, these properties do hold.
+
+\begin{definition}
+%
+We assume a potentially infinite set of \emph{elements}, $\calD$, and a given set of \emph{edit operations} on them, $E: \calD \rightarrow \calD$. Each edit operation $e \in E$ has a \emph{cost}, $\cost(e) > 0$,  which is additive, so for any $E' \subset E$, $\cost(E') = \sum_{e \in E'} \cost(e)$. The element resulting from applying an edit operation $e \in E$ on $c \in \calD$ is denoted by $e(c)$.  The \emph{edit distance} between two elements $c, c' \in \calD$, $\dist(c, c')$, is the minimal cost $\sum_{i \in [n]} \cost(e_i)$ of any finite sequence of edit operations $e_1, e_2, \ldots e_n$, $n \ge 0$, that convert $c$  to $c'$, $e_n(\ldots(e_2(e_1(c)))\ldots) = c'$.\qqed  
+%
+\end{definition}
+
+We assume a given election, where the alternatives on vote are all the elements in the state space. Each voter merely specifies an element of the state space as her ideal point. We understand the ideal point of a voter as her most preferred element of the state space. Then, we infer her ranking over all elements of the state space by the metric defined via the edit operations.
+
+\begin{definition}[Prefers]\label{lemma:prefers}
+%
+Let $d, c, c' \in \calD$ be drafts.  We say that  $d$ \emph{prefers}  $c$ to $c'$, $ c \prefers{d} c'$, if $\dist(d, c) < \dist(d, c')$.\qqed
+\end{definition}
+
+In this work we are interested in identifying a Condorcet-winner giving the set of ideal points of the voters.
+%
+A Condorcet-winner of a state space, with respect to a set of ideal points of the voters, is an element $c$ of the state space such that for any other element $c'$, there is a voter majority which prefers $c$ over $c'$.
+
+\begin{definition}[Condorcet-winner]\label{lemma:condorcet-winner}
+%
+Let $D \subset \calD$ be the ideal points of the voters. An element $c \in \calD$ is a \emph{Condorcet-winner} of $D$ if, for any other element $c' \in \calD$:  $|\{ d \in D : c \prefers{d} c' \}| > |\{ d \in D : c' \prefers{d} c \}|$.
+%
+\end{definition}
+
+Then we can apply the Condorcet criterion to our setting.
+
+\begin{definition}[Condorcet-consistency]
+%
+A voting process is \emph{Condorcet-consistent} if it elects a Condorcet-winner whenever such exists.
+%
+\end{definition}
+
+
+\section{A Hill-climbing Aggregation Algorithm}
+
+Next we describe a simple aggregation algorithm. 
+The algorithm maintains a current element, which can be initialized arbitrarily. Then, in each iteration it looks for an edit operation which, if done on the current element, would result in another element for which there is a voter majority which prefers it over the current element. 
+
+For convenience, we say that a voter approves an element if it ranks it higher than the current element; i.e., if it is closer, as defined via the metric defined via the edit operations, to its ideal point than the current element.
+
+\begin{definition}[Approves, Majority approval]
+%
+Given a set of ideal points $D$ and a current element $c \in \calD$,  we say that $d \in D$ \emph{approves} the edit operation $e$ on $c$ if it prefers $e(c)$ to $c$, namely $e(c) \prefers{d} c$.  An edit operation $e$ on $c$ has \emph{majority approval} by $D$ if $|\{d \in D : e(c) \prefers{d} c| > \frac{1}{2}{|D|}$.
+%
+\end{definition}
+
+We are ready to describe the hill-climbing algorithm formally.
+
+\begin{algorithm}[Hill-climbing Aggregation Algorithm]\label{algorithm:iva}
+With a set of edit operations $E$ on a state space $\calD$, a set of ideal points $D \subset \calD$, an initial element $c \in \calD$ that can be chosen arbitrarily, the algorithm proceeds in rounds to elect an element $w \in \calD$.   In each round, an edit operation $e \in E$, with majority-approval by $D$ is arbitrarily picked and applied to $c$, setting $c := e(c)$;
+if no such edit operation exists, then the process elects $w:=c$ and halts.
+\end{algorithm}
+
+In the rest of this section we analyze this hill-climbing algorithm. Specifically, we are interested in conditions which are sufficient for it to halt, to run in certain time complexity, and to elect a Condorcet winner.
+
+First we show that the hill-climbing algorithm halts if the set of edit operations is so-called \emph{closed under inversion}.
+
+\begin{definition}
+%
+A set of edit operations $E$ on $\calD$ is \emph{closed under inversion} if each edit operation $e \in E$ has an inverse $e' \in E$ such that $\cost(e') \leq \cost(e)$ and if $e(d) \ne d$ then $e'(e(d)) = d$ for any $d \in \calD$.
+%
+\end{definition}
+
+\begin{lemma}\label{lemma:inverse}
+Let $E$ be a set of edit operations which is closed under inversion and $e \in E$ some edit operation.
+Let $D$ be a set of ideal points and $d \in D$ some element.
+Then, if $d$ is a Condorcet-winner of $D$ and $e(d)$ is not,
+then applying $e^{-1}$ to $e(d)$ has majority approval by $D$.
+\end{lemma}
+
+\begin{proof}
+%
+Since $d$ is a Condorcet-winner and $e(d)$ is not, they are distinct, hence by definition of Condorcet-winner there is a majority that prefers $d$ over $e(d)$.  This majority would approve any edit operation that takes $e(d)$ to $d$, in particular it would approve $e^{-1}$.\qqed
+%
+\end{proof}
+
+\begin{lemma}\label{lemma:stops}
+If the set of edit operations $E$ is closed under inversion then Algorithm~\ref{algorithm:iva} halts.
+\end{lemma}
+
+\begin{proof}
+%
+We show that the sum of distances between all ideal points $D$ to the current element maintained by Algorithm~\ref{algorithm:iva} decreases in each iteration. Since this sum cannot be negative, the process cannot continue indefinitely. Consider an iteration in which the current element is $c$ and an edit operation $e \in E$ is chosen, and let us investigate the effect of $e$ on $\sum_{d \in D} \dist(d, c)$.
+%
+Let $D^-$ be the set of ideal points that approve $e$ (since it decreases their distance to $c$), $D^- = \{d \in D: e(c) \prefers{d} c\}$,  and let $D^+$ be the set of ideal points that do not approve $e$, $D^+ = D \setminus D^-$. Since $e$ has an inverse with the same cost, it can increase the distance between $c$ and any $d \in D$ by at most $\cost(e)$.
+Hence,  $D^+$ may contribute a distance increase of at most $|D^+| \cdot \cost(e)$, whereas  $D^-$  contributes a distance decrease of exactly $|D^-| \cdot \cost(e)$. 
+Since $e$ is majority-approved, $|D^-| > |D^+|$.   Hence  $\sum_{d \in D} (\dist(d, e(c)) -\dist(d,c)) \le |D^+| \cdot \cost(e) -  |D^-| \cdot \cost(e)  = (|D^+| - |D^-|) \cdot \cost(e) \le  -\cost(e) < 0$.  The sum of the distances indeed decreases in each iteration by and therefore the algorithm halts.
+%
+\end{proof}
+
+The proof above also implies the following corollary, as it shows in particular that in each round the total cost decreases by at least the cost of the cheapest edit operation.
+
+\begin{corollary}
+  If the set of edit operation $E$ is closed under inversion and the cheapest edit operation costs $\epsilon$ then the number of rounds of the hill-climbing algorithm is at most $\epsilon^{-1} \cdot \sum_{d \in D} \dist(d, c)$, where $c$ is the initial element. 
+\end{corollary}
+
+We consider another property of sets of edit operations, namely lack of a local maximum. This property would be helpful in investigating the output of the hill-climbing algorithm.
+
+\nimrod{This is actually not a property of the set of edit operations, but a property of the whole ``setting''. Say that, a ``setting'' is a tuple ($\calD, E$).}
+
+\begin{definition}
+%
+A set of edit operations $E$ is \emph{free of local maxima} if it holds that for any set of ideal points $D \subset \calD$ that has a Condorcet-winner and any draft $c \in \calD$, either $c$ is a Condorcet-winner of $D$ or $c$ has an edit operation $e \in E$ with majority approval by $D$.
+%
+\end{definition}
+
+Next we show that the hill-climbing algorithm is Condorcet-consistent under the above conditions. The proof follows the fact that the hill-climbing algorithm is in essence a local search algorithm, and so, if the set of edit operations is free of local maxima, then a local search would find the global maximum.
+
+\begin{lemma}\label{lemma:IIAV-epsilon-condorcet}
+If the set of edit operations $E$ is closed under inversion and free of local maxima then Algorithm~\ref{algorithm:iva} is Condorcet-consistent.
+\end{lemma}
+
+\begin{proof}
+%
+We need to show that Algorithm \ref{algorithm:iva} elects a Condorcet-winner assuming $D$ has a Condorcet-winner and $E$ is closed under inversion and is free of local maxima.
+Since $E$ is closed under inversion, the process halts according to Lemma \ref{lemma:stops}.  Let $w$ be the element it elects before it halts and assume, by way of contradiction, that $w$ is not a Condorcet-winner of $D$.  Since $E$ has no local maxima then, by definition, there is an edit operation $e \in E$ to $w$ with majority approval by $D$.  This violates the termination condition of the algorithm and hence it cannot elect $w$ and halt, a contradiction.   Therefore, the element $w$ is a Condorcet-winner.\qqed
+%
+\end{proof}
+
+Combining the results above, we have the following.
+
+\begin{corollary}\label{corollary:IIAV--condorcet}
+If the set of edit operations $E$ is closed under inversion, free of local maxima, then Algorithm \ref{algorithm:iva} is Condorcet-consistent.
+\end{corollary}
+
+\begin{proof}
+%
+As $E$ is closed under inversion, the hill-climbing algorithm halts. As $E$ is free of local maxima, it halts on a Condorcet-winner if such exists.\qqed
+%
+\end{proof}
+
+
+\section{Instances of the General Model}
+
+After the introduction of our general framework and algorithm and the conditions on the edit operations that render our algorithm Condorcet-consistent according to our definition, next we consider instances of this framework for certain social choice tasks:
+  Single-winner elections,
+  committee elections,
+  line budgeting,
+  and legislation.
+  
+
+\section{Single-winner Elections}
+
+In the setting of single-winner elections, there is an underlying set of alternatives $A = \{a_1, \ldots, a_m\}$ thus, viewed in our model, the state space contains exactly the set $A$. Then, an ideal point of each voter is merely her most-preferred alternative.
+
+In the most basic setting, there is no structure between the alternatives, thus no structure between the elements of the state space, thus the most basic set of edit operations $E$ we consider contains only one edit operation:
+  \emph{replace(D, a)}:
+    This edit operation, of cost $1$, when applied to an element $D$, returns the element $a$.
+
+Let us first check whether inversion, closeness and freedom of local maxima hold.
+
+\begin{lemma}
+  $E$ is closed under inversion and free of local maxima.
+\end{lemma}
+
+\begin{proof}
+%
+Closeness under inversion holds as, for each $D$ in the state space and for each $a$ it holds that:
+  $replace(replace(D, a), D) = D$.
+  
+To see why freedom of local maxima holds, assume that $c$ is the Condorcet winner and $d$ is not. Then, it means that there is a voter majority that prefer $c$ to $d$. Then, this voter majority would approve the edit operation $replace(d, c)$.\qqed
+%
+\end{proof}
+
+We conclude that, for this setting, our hill-climbing algorithm is Condorcet consistent.
+
+\begin{corollary}
+  For this setting, our hill-climbing algorithm is Condorcet consistent.
+\end{corollary}
+
+Next we would like to understand what is the behavior of our aggregation method. It turns our that, for this simple setting, our method is simply Plurality:
+  The Plurality voting rule elects as a winner the alternative which is ranked first by the most voters.
+Consider the Plurality winner of an election $p$. And consider our definition of Condorcet consistency. Then, for any other element in the state space $c \neq p$, there are more voters preferring $p$ over $c$ than vice versa, as for each voter whose ideal point is $p$ (i.e., rank $p$ first), the distance to $p$ is $0$ but the distance to $c$ is $1$. Then, as there are more voters whose ideal point is $p$ than those of $c$, it follows that $p$ would be a Condorcet winner according to our definition.
+
+\begin{observation}
+  For this setting, our method is Plurality.
+\end{observation}
+
+
+\section{One-dimensional Domains}
+
+Here we consider a different social choice task and frame it within our model. Consider again a single-winner election, but now where there is some axis on which the alternatives exist. For concreteness, consider a state space which is $\mathbb{N}$, that is, the natural numbers. Then, each voter has an ideal point which is a natural number. The set $E$ of edit operations might be:
+  (1) unit cost operation of $inc(d)$, which increases the value of the element $d$ by $1$;
+  and
+  (2) the unit cost operation of $dec(d)$, which decreases the value of the element $d$ by $1$.
+
+As before, first we consider the two properties of $E$.
+
+\begin{lemma}
+  This $E$ is closed under inversion and free of local maxima.
+\end{lemma}
+
+\begin{proof}
+%
+Closed under inversion because $inc(dec(d)) = d$ and $dec(inc(d)) = d$.
+
+Free of local maxima as if $d$ is not Condorcet winner then the Condorcet winner is either larger (as a natural number) or smaller. If it is larger than there is majority approval for $inc(d)$ and if it is smaller than for $dec(d)$.
+%
+\end{proof}
+
+So, we have the following.
+
+\begin{corollary}
+  For this setting, hill-climbing is Condorcet consistent.
+\end{corollary}
+
+So what is our method for this setting? It is the median! It selects the median of the ideal points.
+It is interesting also because the median is strategyproof.
+This also shows that important distinction between maximizing the social welfare and our Condorcet definition:
+  using our Condorcet definition we get the median here, where by maximizing the social welfare we would have got the average.
+
+\begin{observation}
+  For this setting, our method selects the Median.
+\end{observation}
+
+
+\section{Committee Elections with Variable number of winners}
+\label{section:commiteee election}
+
+Here we instantiate our general model by considering committee elections with variable number of winners; i.e., where the size of the committee is not given, but shall be decided by the aggregation method.
+
+In committee elections the goal is to elect a committee. The standard model assumes that the size of the committee is known ahead.
+Here we concentrate first on the other case, where the size of the committee is not given, but shall be derived from the voter preferences. There are some papers studying this model as well~\cite{kilgourvnw,vnw}.
+We concentrate on this model as the mathematical treatment is slightly simpler for it. In the next section we also consider the more standard model in which the size of the committee to be elected is given upfront.
+
+In our instantiation to committee elections with variable number of winners of our general framework, there is a set $A$ of alternatives, and the state space $D$ contains all of their subsets, as these are the allowed committees:
+  thus, the state space is $D = 2^A$.
+We consider two unit-cost edit operations, inserting a candidate and deleting a candidate.
+
+As a committee is simply a set of alternatives, we describe the specifics of the instantiations in this more general jargon of sets.
+
+
+\subsection{Edit operations on sets}
+
+\begin{definition}[Editing a set with insert and delete]
+Let $\calS$ be the set of all elements (i.e., all possible committee members) and $\calD_S$ the set of all admissable sets (i.e., possible committees), which are finite sets of elements of $\calS$,   $\calD_S = \{S: S \subset \calS, |S| < \infty\}$. The set of edit operations $E_\calS: \calD_\calS \rightarrow \calD_\calS$ contains, for each $s \in \calS$, the unit-cost operations $\iinsert{s}$ and $\ddelete{s}$, defined by
+$\iinsert{s}(d) = d \cup \{s\}$ and $\ddelete{s}(d) = d \setminus \{s\}$, for any $d \in \calD$.\qqed
+\end{definition}
+
+Indeed, $E_\calS$ is closed under inversion.
+
+\begin{lemma}
+  $E_\calS$ is closed under inversion.
+\end{lemma}
+
+\begin{proof}
+%
+$\iinsert{s}(\ddelete{s}(d)) = d$, and $\ddelete{s}(\iinsert{s}(d)) = d$ if $s \notin d$, $\ddelete{{s'}}(\iinsert{s}(d)) = d$ if $s \in d$ $s' \notin d$, with an operation and its inverse being of equal (unit) cost.  
+%
+\end{proof}
+
+To further understand the setting, note that the edit distance among members of $\calD_S$ is the size of their symmetric difference:  $\dist(d,d') = |d \triangle d'|$ for any $d, d' \in \calD_S$. Hence,
+$d \in \calD_S$ approves the edit operation $e$ on the element $c \in \calD_S$ if $e(c) \prefers{d} c$, namely  $\dist(c, e(d)) < \dist(c, d)$, which in this case holds if $|c \triangle e(d)| < |c \triangle d|$.  This can happen either if $e = \iinsert{s}(d)$ for $s  \in c \setminus d$, or if $e = \ddelete{s}(d)$ for $s  \in d \setminus c$. 
+
+We wish to better understand how does Condorcet winners look in this setting. For this, the next definition would be useful.
+
+\begin{definition}[Majoritarian set]\label{definition:majoritatian-set}
+%
+Let $D \subset \calD$ be a finite set of ideal points. Then, the \emph{majoritarian set} of $D$, $m_D$, is the set of elements which are members of a majority of the ideal points in $D$, $mD = \{s: |d \in D : s \in d| > \frac{1}{2}{|D|}\}$.\qqed
+%
+\end{definition}
+
+\nimrod{There is some mess between Condorcet-winner and weak Condorcet-winner.. In fact, there is already this mess when we speak of the Median rule, and actually even when we speak of Plurality:
+  For example, if there are 2 voters for the simplest single-winner scenario, one with ideal point $a$ and another with ideal point $b$, then there is no Condorcet winner, but both $a$ and $b$ are weak Condorcet winners I think.. And our hill climbing will find them..}
+
+That is, the majoritarian set is simply a set containing exactly those elements which appear in more than half of the ideal points of the voters.
+
+\begin{lemma}[Majoritarian $\rightarrow$ Condorcet-winner]
+\label{lemma:condorcet-majoritarian}
+The majoritarian set $m_D$ of a set of ideal points $D \subset \calD$ is a Condorcet-winner of $D$.
+\end{lemma}
+
+\begin{proof}
+%
+By way of contradiction, assume that $m_D$ is not a Condorcet-winner of $D$.  Then there is another draft, say $c_1$, for which there is no majority of $D$ which prefer $m_D$ over $c_1$.  
+Let $e_1, e_2, \ldots e_n$, $n \ge 1$, be a minimal set of edit operations that transform $c_1$ to $m_D$,  let $c_{i+1} = e_i(c_i)$, $ i \in [n]$, with $m_D = c_{n+1}$. Consider the first $i \in [n]$ for which the majority prefers $c_i$ over $m_D$ but not $c_{i+1}$.  Since $c_1$ is preferred over $m_D$ by assumption and $c_{n+1} = m_D$ is not preferred to itself, such an $i$ must exist.   
+%Since the set of edit operations is minimal, then $e_i$ reduces the distance between $c_i$ and $m_D$.
+There are two cases to consider: One, $e_i = \ddelete{s}(c_i)$ for some $s \in \calS$.  As the sequence of edit operations is minimal,  $s \notin m_D$, which means that $s$ is not a member of the majority of $D$.  Hence, there is majority approval by $D$ for $e_i = \ddelete{s}(c_i)$.
+Two, $e_i = \iinsert{s}(c_i)$.  As the sequence of edit operations is minimal,  $s \in m_D$, which means that $s$ is a member of the majority of $D$.  Hence, there is majority approval by $D$ for $e_i = \iinsert{s}(c_i)$.  In either case, $e_i$ reduces the distance of $s_i$ to the majority of $D$. Hence, if the majority prefers $s_i$ to $m_D$, it must prefer also $s_{i+1}$ over $m_D$, a contradiction.
+%
+\end{proof}
+
+\begin{example}
+%
+Assume that $D = \{ \{a\}, \{b\} \}$.
+Then, the set of Condorcet-winners is
+$\{ \emptyset, \{a\}, \{b\}, \{a,b\} \}$, since in such an extreme case of total disagreement, no majority prefers any set over any of these sets.
+Furthermore, the set $\textrm{weak-}m_D = \{a, b\}$ is the weak-majoritarian set, and the set $m_D = \emptyset$ is the majoritarian set.
+%
+\end{example}
+
+Now we are ready to show that $E_\calS$ is free of local maxima.
+
+\begin{lemma}
+  The set of edit operations $E_\calS$ is free of local maxima.
+\end{lemma}
+
+\begin{proof}
+%
+Let $D \subset \calD_S$ be a finite set of ideal points and $m_D$ the majoritarian set of $D$, which, by Lemma \ref{lemma:condorcet-majoritarian}, is a Condorcet-winner of $D$.  Let $c \in \calD$ be an ideal point that is not a Condorcet-winner of $D$. We must show that
+$c$ has an edit operation $e \in E_S$ with majority approval by $D$. Consider any  element $s$ in the symmetric difference,  $s \in c \triangle m_D$.
+There are two cases: One, $s \in c \setminus m_D$. Then $s$ is not a member of the majority of $D$, and therefore there is majority approval by $D$ for its deletion from $c$.
+Two, $s \in m_D \setminus c$. Then $s$ is a member of the majority of $D$, and therefore there is majority approval by $D$ for its insertion to  $c$. In either case, there is an an edit operation to $c$ with majority approval by $D$.
+%
+\end{proof}
+
+We conclude that our hill-climbing algorithm is Condorcet consistent for this setting of committee selection with variable number of winners.
+
+\begin{corollary}
+  For this setting, our hill-climbing algorithm is Condorcet consistent.
+\end{corollary}
+
+It is also very efficient in this setting, as we show next.
+
+\begin{lemma}
+Our hill-climbing algorithm, applied to $E_\calS$,  a finite set of ideal points $D \subset \calD_S$ and the current element $c = \emptyset$, elects $m_D$ in $|m_D|$ iterations.
+\end{lemma}
+
+\begin{proof}
+Note that at each round of the algorithm the edit operations to $c$ with majority approval by $D$ are exactly $\{\iinsert{s}(c) : s \in m_D \setminus c\}$.
+\end{proof}
+
+And what is the aggregation method we get here?
+Well, it is almost the same as MV of VNW:
+  In VNW, MV returns one committee containing all candidates with at least half approval scores; here we can return this committee, but we can actually choose which of the alternatives which get exactly half we include and which we do not, as they do not matter (all of the resulting committees will be weak condorcet winners due to this tie of half half).
+  
+\begin{observation}
+  In this setting, our hill-climbing is:
+    Return a committee containing all alternatives which are approved by more then half of the voters, and any subset of those approved by exactly half
+    (all of these possibilities would be weak Condorcet winners).
+\end{observation}
+
+
+\section{Committee Selection with $k$}
+
+So when the size of the committee is given as $k$, what shall we do?
+So we view each possible ideal point as a member of $[m]_k$ (that is, of a set over $A$ of size exactly $k$) and similarly each possible outcome is a member of $[m]_k$.
+So this is the state space.
+
+The edit operations insert and delete do not make sense now, but we shall have only one edit operation: \emph{swap}(a, b) which, well, swaps a for b.
+
+\begin{lemma}
+  This $E$ is closed under inversion.
+\end{lemma}
+
+\begin{proof}
+Applying swap(b,a) after applying swap(a,b) results in the initial committee.
+\end{proof}
+
+It is also free of local maxima.
+
+\begin{lemma}
+  This $E$ is free of local maxima.
+\end{lemma}
+
+\begin{proof}
+%
+Consider first the ``approval-committee'' $c$ which is an element of the state space containing $k$ of the candidates with the highest approval scores.
+This is Condorcet winner as for any other element (i.e., committee) $d$ we can do a swap which a voter majority would approve. Thus in particular also free of local maxima follows.
+%
+\end{proof}
+
+So we conclude as follows.
+
+\begin{corollary}
+  For this setting, hill-climbing is Condorcet consistent.
+\end{corollary}
+
+So what is our framework for this setting? In fact it is approval voting as we return a committee containing $k$ candidates which has highest approval scores.
+
+\begin{observation}
+For this setting, we are approval voting AV.
+\end{observation}
+
+
+\section{Line Budgeting}
+\label{section:e-process budgeting}
+
+Here we consider budgeting. First we describe our model of budgeting and then how we instantiate is in our framework.
+
+
+\subsection{Line item budgets}
+
+Budgeting has a long tradition of constructing an annual budget as a modification of last year's budget.  The standard representation that facilitates such comparison is called a \emph{line item budget}, where each line has the name of a budget item and its budgeted cost.
+
+Slightly more formally,
+assume a given set of \emph{budget items} $\calB$. A \emph{budget line} is a pair $(b,n)$, where $b \in \calB$ is a budget item and $n \in \mathcal{N}$ is its budgeted cost.  A \emph{line item budget draft} $d$ is a finite set of budget lines, each with a distinct budget item.
+
+The requirement that each budget line has a distinct budget item in effect makes a line item budget an indexed set of budgeted costs, with the indices being
+budget items.  Hence the following.
+Let $d$ be a budget draft and $b \in \calB$  any budget item. The \emph{budgeted cost} $d_b$ of $b$ in $d$ is $n$ if $(b,n) \in d$, else 0.
+
+
+\subsection{Line Budgets as Multisets}
+
+So we view a line budget as a multiset. Notice that there is no problem complexity-wise as voters do not need to specify the multiset with the explicit multiplicities, but can state in the usual ``item, quantity'' way.
+Accordingly, jargon-wise, next we speak generally on multisets as it makes the discussion more general.
+
+We have underlying objects (i.e., lines in the line budget). Each element in the state space is a multiset over these objects, namely such that can include as many copies from each object (i.e., having $n$ copies of line $b$ means we want to spend $n$ dollars on the budget item $b$). 
+
+The edit operations are those usual on multisets:  
+  increase-multiplicity(a) and decrease-multiplicity(a) which can be renamed also: insert(a) and delete(a),
+  so we will call them like this.
+
+The two properites we like hold here, as we show next.
+
+\begin{lemma}
+  This $E$ is closed under inversion.
+\end{lemma}
+
+\begin{proof}
+$insert(delete(a)) = delete(insert(a)) = a$.
+\end{proof}
+
+\begin{lemma}
+  This $E$ is free of local maxima.
+\end{lemma}
+
+\begin{proof}
+%
+The proof logic can be like this:
+  First, notice that in fact we can treat each line separately, as there are no connections between them.
+  Second, each line on its own is like the ``one-dimensional domain'' for which we show that it is always good to either increase a little bit or decrease a little bit (i.e., go towards the median).
+%
+\end{proof}
+  
+So we have the following.
+
+\begin{corollary}
+  In this setting, hill-climbing is Condorcet consistent.
+\end{corollary}
+
+So what do we get in this setting?
+There is no name for this aggregation method, because there is no research on this model of line budgets. But, what we get is that we return a line budget which, on each line, it is the Median.
+
+\begin{observation}
+Our aggregation method returns a line budget where in each line of the budget we spend the Median of what the voters wanted.
+\end{observation}
+
+
+\section{Line Budget with Budget Limit}
+
+In the previous section we considered line budgets but we did not consider budget limits, thus we returned the line budget which on each line is the Median of the values given by the ideal points of the voters.
+What happens in the more realistic model where we also have a budget limit which we cannot go above? (as in the previous section we might in fact spend more money than we can..)
+
+So the state space now shall contain all multisets of the available objects (lines) but the size (that is, the sum of its multiplicities) cannot be above some global, given budget limit $L$. The edit operations are the same. 
+
+First, see that here also we are closed under inversion.
+
+Now, are we free of local maxima? Perhaps no..
+
+\nimrod{I'm here now:
+  It looks useful to think about each line as an interval where the best would be to pick the median. But since we do not have enough funds, or maybe we have too much funds, then selecting the median in each line is perhaps not possible. Then, could it be that we have some local maxima? Also, what exactly does our aggregation method do now?}
+
+
+\section{Standard Participatory Budgeting}
+
+In the previous section we considered line budgets as a model for budgeting.
+Here we consider a different model for participatory budgeting, one which generalizes multiwinner elections directly. Here, we have a set of items, each with its own cost, and a budget limit, and we shall select a bundle of items whose total cost does not go over the limit.
+
+So the state space now shall contain all admissible (a bundle is admissible if it respects the budget limit) bundles over the underlying set of items $A$. So each ideal point is an admissible bundle (in this respect we are similar to Knapsack voting (Goel) in which also each voter provides an admissible bundle).
+The operations are: $add_a$ which costs $cost(a)$ and adds the item $a$ to the bundle, and $del_a$ which costs $cost(a)$ and deletes the item $a$ from the bundle. (There is another option of having these operations be unit cost, but it seems weird).
+
+\begin{lemma}
+  This $E$ is closed under inversion.
+\end{lemma}
+
+\begin{proof}
+  Observe that $del_a(ins_a(d)) = d$ and $ins_a(del_a(d)) = d$.
+\end{proof}
+
+While above we showed that we are closed under inversion,
+this setting is not free of local maxima, as the example below shows.
+
+\begin{example}
+%
+Let the underlying set of items be $A = \{a, b, c, d\}$ where $cost(a) = 2$ and $cost(b) = cost(c) = cost(d) = 1$. Let the budget limit be $L = 3$.
+Consider voters with the ideal points as follows:
+  Voter $v_1$ with ideal point $\{b,c,d\}$;
+  Voter $v_2$ with ideal point $\{b,c,d\}$;
+  Voter $v_3$ with ideal point $\{a,b\}$;
+  Voter $v_4$ with ideal point $\{a,c\}$;
+  and Voter $v_5$ with ideal point $\{a,d\}$.
+
+Now, observe first that $\{b,c,d\}$ is not a Condorcet winner:
+  This is so as it loses to the bundle $\{a,b\}$ (since $v_3$, $v_4$, and $v_5$ all prefer $\{a,b\}$ over $\{b,c,d\}$.
+The crucial point now is that, even though $\{b,c,d\}$ is not a Condorcet winner,
+there is no edit operation to $\{b,c,d\}$ with a majority support:
+  Without loss of generality, the only edit operation we shall consider is $del_d$ but then we will get $\{b,c\}$ and only $v_3$ and $v_4$ prefer it over $\{b,c,d\}$ while all other three voters prefer $\{b,c,d\}$ thus there is no majority support for this operation.
+
+Intuitively, this example is such as, to reach the Condorcet winner here, which is $\{a,b\}$ (or $\{a,c\}$ or $\{a,d\}$) we need several operations, but a single operation does not have majority support.
+%
+\end{example}
+
+This means that our hill-climbing algorithm perhaps does not find the Condorcet winner.
+Nevertheless, we can ask what aggregation method we end up with:
+  \nimrod{It seems like the maximize version of Knapsack voting, but I'm not completely sure..}
+
+
+\section{Legislation}
+
+Here we instantiate our model for legislation.
+The state space contains all possible drafts, which are ordered multisets of sentences (we can also do over some alphabet, it doesn't matter now). So each ideal point is an ordered multiset. The edit operations are ``insert sentence x at position j''; ``delete sentence x from position j''; and ``swap the sentences at positions i and j''.
+
+Now it looks that $E$ is closed under inversion.
+
+\nimrod{%
+But perhaps it is not free of local maxima (intuition would be perhaps from closest string}
+
+\nimrod{Then we go on to speak about our relaxations of the model:
+  (1) we do such that the swap operation is very cheap $1/n^2$ so we can now view this as simple multiset and get a $1$-approximation to the Condorcet winner;
+  (2) after this, we take the winning multiset, then we consider all permutations given by the ideal points of the voters, and only look for a winning permutation among them, so this is polytime. But it is not really in our framework..}
+
+\nimrod{Below I didn't touch yet...}
+
+
+\section{An e-Process for Legislation}
+\label{section:e-process legislation}
+
+\subsection{Background}
+
+[Related work on e-legislation]
+
+Our second domain of application of the e-process is legislation.
+We view the legislation \emph{text} as a string (i.e., finite sequence) over the infinite alphabet of sentences, and consider the text editing operations of inserting a sentence in a specific location in the text, deleting a sentence from a specific location in the text, and permuting the order of two adjacent sentences in a text. While we assign the cost of $1$ to \emph{insert} and \emph{delete}, we set the cost of permuting two sentences of a string of length $n$ to $\frac{1}{n^2}$.  That is, we give higher weight to getting the right set of sentences, and lower weight to ordering them correctly. 
+
+A string of length $n$ can be set in a chosen order with at most ${n^2}$ \emph{permute} operations at a cost of no more than $1$. This suggests using the methods developed fro committee election in Section~\ref{section:commiteee election} for sets (or multisets) of sentences to first get the right sentences into the common draft, so it is within a distance of $1$ to a Condorcet winner that is an ordered majoritarian draft, and then reducing the distance further by permuting the sentences.\footnote{
+Notice that sometimes deferring all the permute operations to the end is not optimal; e.g., to go from the draft $ab$ to the draft $bca$, it is better to first permute the adjacent $a$ and $b$ and only then insert $c$ between them.} Specifically, here we assume a process in which sentences are first elected and then ordered.
+
+\subsection{First vote-aggregation step: Electing the right sentences}
+
+\begin{definition}[Editing text with insert, delete and permute]
+Let $\calS$ be the set of all sentences and $\calT_\calS$ the set of all drafts, which are strings of sentences of $\calS$,   
+$\calT_\calS = \{s_1\cdot s_2 \cdot \ldots  s_n : s_i \in \calS, i \in [n]\}$. The set of edit operations $E_\calT: \calT_\calS \rightarrow \calT_\calS$ contains, for each draft $t = s_1\cdot s_2\cdot \ldots s_n \in \calT_\calS$ of length $|t|=n$ and each sentence $s \in \calS$, the unit cost operations $\iinsert{{s, i}}$, $i \in [n + 1]$, and $\ddelete{i}$, $i \in [n]$, and the $\frac{1}{n^2}$-cost operation $\permute{i}$, $i \in [n - 1]$, defined as follows:
+%
+\begin{itemize}
+
+\item
+$\iinsert{{s, i}}(t) = s_1\cdot \ldots s_i\cdot s\cdot s_{i + 1}\cdot \ldots s_n$.
+
+
+\item
+$\ddelete{i}(t) = s_1\cdot \ldots s_{i - 1}\cdot s_{i + 1}\cdot \ldots s_n$ \\
+(with the obvious special cases for $i, n \le  2$).
+
+\item
+$\permute{i}(t) = s_1\cdot \ldots s_{i+1}\cdot s_i\cdot \ldots s_n$.
+\qqed
+\end{itemize}
+%
+\end{definition}
+
+Note that this set of edit operations is closed under inversion.
+
+\begin{definition}[Membership in a string]\label{definition:string-membership}
+For a string $t = s_1\cdot s_2\cdot \ldots s_n$, we say that $s \in t$ iff $s = s_i$ for some $i \in [n]$.\qqed
+\end{definition}
+
+This use of set membership allows us to view strings also abstractly as multi-sets.  As before, however, to make the mathematical treatment less cumbersome, we will assume that each sentence occurs at most once in a string, and thus they can be abstracted as sets; this assumption will be relaxed later.
+
+\begin{definition}[Majoritarian text]\label{definition:majoritarian-drafts}
+%
+Let $D \subset \calT$ be a set of text drafts. A text draft $t \in \calT$ is a \emph{majoritarian text} of $D$ if it contains exactly the sentences which are members of the majority of the drafts in $D$; that is, if for each $s$ it holds that $s \in t$ if and only if $|\{d \in D : s \in d\}| > |D|/n$.
+
+The set of majoritarian texts of $D$ is denoted by $M_D$.\qqed
+%
+\end{definition}
+
+Similarly, the notions of \emph{weak majoritarian text} and $\textrm{weak-}M_D$ are obtained by replacing $>$  by $\ge$ in Definition \ref{definition:majoritarian-drafts}.
+
+Note that $M_D$ and $\textrm{weak-}M_D$ are indeed sets of text drafts, as permuting  the order of sentences in a text does not change its set of sentences and hence whether it is majoritarian. Furthermore, the distance between two majoritarian texts or two weak-majoritarian texts is at most $1$: They differ only in the order of their sentences, and hence can be equated with no more than $n^2$ permute operations that cost at most $1$.
+
+\begin{example}
+%
+Let $D = \{abd, bac, ba, c\}$. Then, since $a$ and $b$ are in a majority of the drafts while $c$ is in a weak-majority of the drafts, we have $M_D = \{ab, ba\}$ and $\textrm{weak-}M_D = \{abc, acb, bac, bca, cab, cba\}$.
+%
+\end{example}
+
+\begin{lemma}\label{lemma:cinmd}
+  If there is a Condorcet winner $c$ of a set of text drafts $D$, then $c \in M_D$.
+\end{lemma}
+
+\begin{proof}
+%
+Assume, by way of contradiction, that there is a Condorcet winner $c$ of $D$, albeit $c \notin M_D$. Then there are two cases to consider.
+
+In the first case, there is some $s \notin c$ such that $c$ is in at least half of the drafts of $D$. Then, consider the draft $c \cdot s$ (that is, insert $s$ to $c$) and observe that a majority of the drafts of $D$ prefer $c \cdot s$ to $c$:
+  This is so since it is possible to move $s$ to its correct place in total operation cost strictly smaller than $1$, which is the cost of inserting it. Thus, we contradict $c$ being a Condorcet-winner of~$D$.
+
+In the second case, similarly, there is some $s \in c$ such that $c$ is in less then a majority of the drafts of $D$. Then, consider the draft $c \setminus \{s\}$ (that is, delete $s$ from $c$), and notice the draft majority of $D$ which does not have $s$ prefers $c \setminus \{s\}$ over $c$:
+  This is so since it is possible to move $s$ to its correct place in total operation cost strictly smaller than $1$, which is the cost of deleting it. Thus, we contradict $c$ being a Condorcet-winner of $D$.\qqed
+%
+\end{proof}
+
+Condorcet winners sometimes do not exist in this setting, as the next example demonstrates.
+
+\begin{example}
+%
+Let $D = \{abc, bca, cab\}$; then, there is no Condorcet winner. To see this, notice that $M_D = \textrm{weak-}M_D = \{abc, bac, cab, acb, bca, cba\}$, thus, following Lemma~\ref{lemma:cinmd}, if there is a Condorcet winner, then it is one of these drafts. However, these draft constitute a Condorcet cycle: $abc \to bac \to cab \to acb \to bca \to cba \to abc$; e.g., both $abc$ and $bca$ prefer $bac$ over $cab$.
+%
+\end{example}
+
+Nevertheless, if there is a Condorcet winner, then at least we are able to compute, in polynomial time, a draft which is close to it.
+
+\begin{lemma}
+  Finding a $1$-Condorcet-winning text draft of a set $D$ can be done in polynomial time in $|D|$.
+\end{lemma}
+
+\begin{proof}
+%
+We prove the Lemma by describing a polynomial-time $1$-Condorcet-consistent algorithm:
+  The algorithm is Implicit-Vote Aggregation only on the insert and delete; thus it finds $m_D$.
+Then, notice that
+(1) $m_D \in M_D$;
+(2) the Condorcet winner is also in $M_D$ (this is the last lemma);
+(3) the distance of any two drafts in $M_D$ is at most $1$  since each permute operation costs $\frac{1}{n^2}$ and it is always possible to permute one draft to another---containing the same set of sentences---by at most $n^2$ permute operations.
+
+It follows then that our algorithm indeed runs in polynomial time in $|D|$ and is $1$-Condorcet-consistent.
+%
+\end{proof}
+
+\subsection{Second vote-aggregation step: Ordering the elected sentences}
+
+The section above resulted in a polynomial-time $1$-Condorcet-consistent algorithm; specifically, it finds a $1$-Condorcet-winning set of sentences.
+As Step 2 begins once the elected sentences are known, say $W$, we can limit each draft in $D$ to a permutation of the sentences in $W$.
+A trivial exponential-time algorithm would check all permutations of these sentences and would find a Condorcet-winning permutation, if there is one, but we question the wisdom of doing so. The reason is that the Condorcet-winning order of sentences may reflect a compromise that was not offered by any draft and hence might not make sense.
+Instead, we limit the alternative orders explored to those actually manifested in $D$, so $D$ embodies both the set of alternatives and the set of votes. Given this choice, the order of sentences in our elected text would be trivially $n$-way consistent, for $n = |W|$
+(this is so as, in this case, each possible elected text must equal at least one private draft).
+
+\udi{I am not sure who wrote the last few sentences (me?) but I don't understand them now}
+
+With this restriction, the task now reduces to finding a Condorcet winner among $D$. As we aim to select a permutation containing exactly the sentences of $W$,
+each published draft $d$ in $D$ might consist of a different set of sentences, and in particular may have only partial information regarding the ordering of the sentences in $W$, as well as irrelevant information regarding the ordering of sentences not in $W$.  To address this, we remove from each draft $d \in D$ all sentences contained not in $W$, and consider each sentence of $W$ not in $d$ as being \emph{unordered} by $d$.  Then, we can generalize the \emph{permute} operation to define a Condorcet winner.
+
+To achieve this task, we consider a novel data type, referred to as a \emph{string-set}, which is a hybrid of a string and a set:
+  A string-set can be a string when all its elements are ordered,
+  or a set when none are ordered,
+  or a hybrid, when some are ordered and some are not.
+It may be visualized as a string with additional elements still floating above it, awaiting to find their place in the string.
+
+\begin{definition}[String-set]
+  A \emph{string-set} is a pair
+  $(d, s)$
+  of a string $d$ 
+  and a set $s$ over the same alphabet.\qqed
+\end{definition}
+
+If $d$ is a published draft and $W$ is the winning set sentences of Step 1, we wish to capture the order constraints $d$ induces on members of $W$ by a string-set, which consists of a string with the members of $d$ that are also members of $W$, in their original order in $d$, and a set with the rest of $W$. This is captured by the following definition.
+
+\begin{definition}
+Let $d \in D$ be a draft and $W$ a set of sentences.
+The \emph{string-set $\{d',s\}$ derived from $d$ and $W$} is defined as follows:
+\begin{itemize}
+
+\item
+$d'$ is a string consisting of the members of $d \cap W$, where $d$ is viewed as set, preserving their relative order in $d$.
+
+\item
+$s = W \setminus d'$, where $d'$ is viewed as a set.\qqed
+
+\end{itemize}
+%
+\end{definition}
+
+\begin{example}
+%
+Consider the string $abc$ and the set $W = \{b, c, d\}$.
+Then, the string-set $abc$ induces on $W$ is  $(bc,\{d\})$.
+%
+\end{example}
+
+We consider the following unit-cost edit operations on a string-set $(d,s)$:
+(1) Permute consecutive sentences in $d$;
+(2) Move a sentence from $s$ to position $i$ in $d$, $0 \le i \le |d|$;
+(3) Move a sentence from position $i$ in $d$, $1 \le i \le |d|$ to $s$.
+
+Equipped with these edit operations,
+we apply Implicit-Vote Aggregation on the set of string-sets derived from the drafts of $D$ and $W$ obtained in Step 1.  The initial string-set is the one derived from the current common draft $c$ and $W$.  The algorithm would identify a Condorcet-winning string-set, if such exists.
+%
+The next example demonstrates that a Condorcet-winning draft is not guaranteed to exist.
+
+\begin{example}
+%
+Let $D = \{abc, acb, bac, bca, cab, cba, abc, bca, cab\}$; then, there is no Condorcet winner. To see this, observe the following Condorcet cycle: $abc \to bac \to cab \to acb \to bca \to cba \to abc$.
+%
+\end{example}
+
+Even if a Condorcet-winning string-set $(d,s)$ exists, it might still be the case that $s$ is not empty.  As the input to the next round is a string, not a string-set, members of $s$ need to be inserted into $d$.  They can be inserted in an arbitrary place in $d$, say at the end, with the expectation that participants happy with these sentences (which are  a majority for each sentence, by definition) but not with their ordering, will place them in their preferred order in the next round of the e-process. We expect that when voting on real text, once the sentences are agreed upon, their ordering would not be controversial or at least resolved easily without cycles.  
+
+To conclude, our e-process on text drafts finds a Condorcet winner among the published drafts, if one exists, where the search space of the set of sentences from which the winner is elected is unbounded, and the search space from which the winning ordering of the sentences is elected is limited to actual orderings presented (even if partially) in the drafts published by participants, with orderings underspecified by participants resolved arbitrarily.
+
+
+\section{Conclusions}
+\label{section:conclusions}
+
+We have developed a process for electing a common draft that integrates the most preferred elements (sentences and their ordering) of drafts published by participants.
+%
+Our process interleaves deliberation and voting, thus helping a community reach a common draft which is, at least, a weak Condorcet winner.
+
+Next we discuss avenues for future research. 
+
+
+\mypara{Other distances}
+%
+As different edit operations define different distances on drafts, this choice has the potential for profound implications on the elected draft. Other distances, besides the distances considered here might be worth to explore; for example, one might consider the distances described in the survey by Schiavinotoo~\cite{schiavinotto2007review}.
+
+Related, but far more ambitious, would be to consider so-called ``semantic'' distances. The idea would be to have a distance measure related to the content of each sentence, so that, intuitively, the distance between semantically-close sentences would be smaller than between sentences whose meaning is very different.
+
+
+\mypara{Other elicitation methods}
+%
+One might consider other elicitation methods, such as voters which directly vote with approvals, voters which rank drafts, etc.
+
+
+\mypara{Different aggregation approaches}
+%
+Here we took a majoritarian approach to aggregating texts, as we applied Condorcet's principle to this setting. It might be interesting to consider applying other social choice frameworks to this setting.
+
+\mypara{UI considerations}
+%
+Here we concentrated on the mathematical foundations of identifying Condorcet-winning drafts for participatory legislation. As we envision our proposal to be manifested as an application to be used by humans, UI considerations are important to tackle. The most immediate aspect to tackle seems to be the ways by which users interact with their private drafts and the common draft.
+
+One way would be to allow participants to review and either accept or reject possible changes to their private drafts as given by other drafts and/or by the common draft:
+  That is, each voter uses a text editor to propose her draft. During deliberation, in the text editor each voter can also review the other proposed drafts, e.g., for each sentence the UI would show the other possibilities proposed by other participants. Then, after a voting iteration, each participant can see the difference between her proposed draft and the current tentative draft and change accordingly if she wishes to.
+
+
+\bibliographystyle{ieeetr}
+\bibliography{bib}
+
+
+\appendix
+
+
+\section{Majoritarian sets and n-way consistency}
+
+
+We consider here $n$-way consistency, which relates the supermajority taken in our iterative process to consistency of the elected drafts.
+
+\begin{definition}[Majoritarian set]\label{definition:appendix-majoritatian-set}
+Let $D \subset \calD$ be a finite set of drafts. Then, the \emph{$\frac{n-1}{n}$-majoritarian set} of $D$, $m^n_D$, is  the set of sentences which are members of a $\frac{n-1}{n}$-majority of the drafts in $D$, $m^n_D = \{s: |d \in D : s \in d| > (n-1)|D|/n\}$.
+%
+For simple majority, $n=2$, we omit the indices and refer to the \emph{majoritarian set} of $D$, $m_D = \{s: |d \in D : s \in d| > |D|/2\}$.\qqed
+%
+\end{definition}
+
+The corresponding notions of \emph{$\frac{n-1}{n}$-weak-majoritarian set} of $D$, $\textrm{weak-}m^n_D$, \emph{weak majoritarian set} of $D$, and $\textrm{weak-}m_D$, are obtained from Definition \ref{definition:appendix-majoritatian-set} by replacing  in it $>$ by $\ge$.
+
+Notice that $m^i_D \subseteq \textrm{weak-}m^i_D$ holds for each $i \in [n]$.
+
+\begin{definition}[$n$-way consistency]
+Let $D \subset \calD$ be a finite set of drafts. A draft $c \in \calD$ is \emph{$n$-way consistent} with $D$ if for every subset $c' \subseteq c$, $|c'|=n$, there is a draft $d \in D$ for which $c' \subseteq d$.\qqed
+\end{definition}
+
+We wish to allow the elected draft to be composed piecemeal, from most-preferred components, and therefore face the danger that the outcome will not be internally consistent. As our only source of information is the voters, we must rely on them to offer consistent drafts.  If we strive for maximal consistency, then we limit our space of alternatives to those actually offered by at least one voter; we recommend doing so in the special case of ordering the elected sentences within a draft (see below).  In general, however, this may be too restrictive, and hence when electing the set of sentences we settle for $2$-way consistency, which comes for free as a natural consequence of relying on a simple majority (see below).
+
+The proof of the following lemma, which shows a relation between majoritarian sets and $n$-way consistency, follows by a counting argument.
+
+\begin{lemma}[$(n - 1)/n$-weak-majoritarian $\rightarrow$ $n$-way consistency]\label{lemma:wm-nwc}
+  Let $D \subset \calD$ be a finite set of drafts. The \emph{$\frac{n-1}{n}$-weak-majoritarian set} of $D$, $\textrm{weak-}m^n_D$, is $n$-ways consistent with $D$. In particular, $\textrm{weak-}m_D$ is pairwise consistent with~$D$.
+\end{lemma}
+
+\begin{proof}
+%
+Assume some ordering on the drafts of $D$, say $D = \{D_1, \ldots, D_{|D|}\}$.
+%
+Consider a subset $c' \subseteq m^n_D$ of the $\frac{n-1}{n}$-majoritarian set, where $|c'| = n$, and consider some ordering of the sentences of $c'$, say $c' = \{c'_1, \ldots, c'_n\}$.
+%
+Let $M = m_{ij}$, $i \in [|D|]$, $j \in [n]$, be a binary matrix where $m_{ij}$ is $1$ if $c'_j$ is present in $D_i$ (i.e., if $c'_j \in D_i$, and $0$ otherwise (if $c'_j \notin D_i$).
+
+Since each sentence in $m^n_D$ is present in more than $\frac{n-1}{n}|D|$ drafts, it means that in total, the number of $1$'s in $M$ is more than $(n-1)|D|$  (i.e., $\sum_{i \in [|D|]} \sum_{j \in [n]} m_{ij} > (n - 1)|D|$).
+
+Now, assume towards a contradiction that $m^n_D$ is not $n$-way consistent; thus, there is no draft $D_i$ for which $c' \subset D_i$. This means that in each row of $M$ there are at most $n - 1$ cells with $1$ (i.e., for each $i \in [|D|]$, it holds that $\sum_{j \in [n]} m_{i,j} \leq n - 1$), thus in total the number of $1$s in $M$ is at most $(n - 1)|D|$ (i.e., $\sum_{i \in [|D|]}\sum_{j \in [n]} m_{i,j} \leq (n - 1)|D|$); thus, we arrive to a contradiction.
+%
+\end{proof}
+
+The following is implied since $m^n_D \subseteq \textrm{weak-}m^n_D$.
+
+\begin{corollary}
+  Let $D \subset \calD$ be a finite set of drafts. The \emph{$\frac{n-1}{n}$-majoritarian set} of $D$, $m^n_D$, is $n$-ways consistent with $D$. In particular, $m_D$ is pairwise consistent with~$D$.
+\end{corollary}
+
+
+\section{Model}\label{section:model}
+
+Here we consider drafts, edit operations, voting and sybil resilience in the abstract.  We then show how to instantiate this abstract framework to  the key tasks of democracy -- elections, legislation and budgeting.
+
+
+\subsection{Sybil-Resilient Iterated Approval Voting}
+
+
+\subsection{Drafts, distance, preference and supermajorities}
+
+\begin{definition}[Drafts, edit-distance]
+%
+We assume a potentially infinite set of \emph{drafts}, $\calD$, and a given set of \emph{edit operations} on drafts, $E: \calD \rightarrow \calD$. Each edit operation $e \in E$ has a \emph{cost}, $\cost(e) > 0$,  which is additive, so for any $E' \subset E$, $\cost(E') = \sum_{e \in E'} \cost(e)$. The draft resulting from applying an edit operation $e \in E$ on  $c \in \calD$ is denoted by $e(c)$.  The \emph{edit distance} between two drafts $c, c' \in \calD$, $\dist(c, c')$, is the minimal cost $\sum_{i \in [n]} \cost(e_i)$ of any finite sequence of edit operations $e_1, e_2, \ldots e_n$, $n \ge 0$, that convert $c$  to $c'$, $e_n(\ldots(e_2(e_1(c)))\ldots) = c'$.\qqed  
+%
+\end{definition}
+
+This model is an instance of Distance-based Reality-aware Social Choice~\cite{realsoc}, where voters preferences are determined by the edit-distances implied by their published drafts:  A published draft prefers a close draft over a distant draft.
+
+\begin{definition}[Prefers]\label{lemma:prefers}
+%
+Let $d, c, c' \in \calD$ be drafts.  We say that  $d$ \emph{prefers}  $c$ to $c'$, $ c \prefers{d} c'$, if $\dist(d, c) < \dist(d, c')$.\qqed
+\end{definition}
+
+
+For the rest of the paper, $\delta$ is a constant satisfying $0 \le \delta < \frac{1}{2}$.
+
+\begin{definition}[$\delta$-supermajority]
+%
+Let $D \subset \calD$ be a finite set of drafts. A draft $c \in \calD$ is said to \emph{win by a $\delta$-supermajority} over draft  $c \in \calD$, if $|\{ d \in D : c \prefers{d} c' \}|  > (\frac{1}{2}+\delta) |D|$.
+
+
+A draft \emph{wins by a simple majority} if it wins by a $0$-supermajority.
+%
+\qqed\end{definition}
+
+
+\section{Committee Elections}
+
+Take part of voting with sets from legislation paper.
+Discuss what kind of voting systems we can support.
+Electing a single Condorcet winner, electing a Condorcet-winning committee using approval voting, etc.
+
+\section{e-Legislation}
+
+Here we summarize the results of \cite{legislation} and add the sybil-resilient component.
+
+\section{e-Budgeting}
+
+A budget $B$ is a set of pairs $(b,q)$ where $b$ is an item and $q$ is its quantity, with at most one such pair for each $b$.
+Cost of all operations is 1?
+
+Operations include add and remove a pair, and change quantity of a pair.
+
+A budget is within limit $l$ if...
+
+The process assumes a limit $l$ and an initial budget within limit. If there is budget reduction compared to last year then the initial budget could be a proportional reduction of last year's budget.  If there is an increase, no need to change last year's budget.
+
+Interesting to compare this approach to our previous algorithm.
+
+Key difference is elicitation - which is much simpler/weaker here.
+But the possibility for rounds allows adjusting the vote to achieve desired impact.
+
+
+%%%%%%%%%%%%%%5 END END END
+
+\pagebreak
+\pagebreak
+
+
+\section{Introduction}\label{section:introduction}
+
+
+The typical outputs of a democratic process are elected candidates, approved budgets, and approved legislation.  While candidates are a ``take-it-or-leave-it'' proposition, budgets and legislation need not be. Yet, presently, legislatures around the world typically vote on ``take-it-or-leave-it'' budgets and legislation, which are produced via opaque processes that are neither deliberative nor egalitarian.  This violates the 1789 Declaration of the Rights of Man and Citizen, which states, in Article VI, that ``The law is the expression of the general will. All the citizens have the right of contributing personally or through their representatives to its formation'' and equally so, according to Article I.
+
+Deliberation and voting seem independent, almost anathemal, activities: In deliberation, the aim is to convince or be convinced; in voting, the aim is to win.  E-democracy may offer an opportunity to bridge this chasm: Our main contribution here is an e-legislation process that integrates deliberation and voting for drafting legislation. The e-legislation process can be used by a legislation-drafting committee, by the legislature itself, by a Special Interest Group (SIG) that wishes to propose new legislation that represents the democratic will of its members, or by the electorate at large (Crowdlaw).
+
+Our e-legislation process begins with a given initial common draft, which may be the current legislation if the wish is to amend it or, if this is a completely new topic, a clean slate, i.e., the empty draft.  Our process proceeds in rounds, each consisting of a deliberation step followed by a vote aggregation step. In the deliberation step,
+participants may propose (possibly anonymously) revisions to the common draft by publishing their private drafts,  and review, discuss, and debate the common draft as well as revisions proposed by other participants. The deliberation step can be as rich and as complex as desired. For example, participants could propose multiple revisions during this step, in order to present their developing ideas as well as to respond to ideas of others. Participants could communicate with each other informally, either off-channel or by commenting on and discussing the common draft as well as the revisions of each other. 
+
+In the vote aggregation step, the common draft is amended by applying to it edit operations that have majority support. Participants do not vote explicitly on proposed edit operations; rather, they ``vote with their words'' by proposing their own revisions, namely publishing their private drafts:  A published draft implicitly votes for an edit operation to the common draft, or \emph{approves} it, if it makes the two drafts closer, a notion defined formally below.  A published draft \emph{ratifies} the common draft if it is identical to it.
+
+There is a spectrum of possible criteria to conclude our process, differentiated by the level of consensus wished for and the time that can be afforded. On one extreme, we consider concluding the process as soon as the common draft stabilizes, while on the other extreme we consider concluding the process only when the common draft has unanimous support. In any case, our process gives preference to the initial draft, which depicts the status quo~\cite{realsoc}, as we require that the final elected common draft must be preferred by a majority over the initial common draft, or else the process is annulled and the status quo is retained.
+As conclusion according to any of these criteria cannot always be reached, a time limit can be added and then, if no conclusion according to the chosen criterion has been reached by the time limit, the final common draft is elected if preferred over the initial common draft.
+
+\udi{We need to explain that prefers relation is not quite true, since intermediate drafts may not be preferred over the status quo even if closer to the peak, due to dependencies/atomicity issues}
+
+Note that a voting step does not require an action from the participants, as it applies the voting algorithm to the extant common draft and the drafts published by the participants, followed by a possible update of the common draft. Yet, the interplay between the time allocated to each round, the total allocated time, and the conclusion criterion will have to be determined by experimentation and experience.  For example, we envision week-long rounds for weighty, long-term constitutional matter that can be concluded over a few months; daily rounds for ordinary matters that should be concluded in weeks; and shorter rounds for urgent or simple matters, provided the participants are able and willing to interact with sufficient frequency and intensity.  We note that seeking a weak Condorcet winner, concluding deliberation after the first round in which the common draft has not changed, does not bode well with short rounds.  On the other hand, if we conclude the debate only after a majority has ratified the common draft, seeking a (strong) Condorcet-winner, then rounds can be short. In principle, rounds are not even necessary for this conclusion criterion, as voting could be done continuously, updating the common draft as soon as a new private draft is published; but the social dynamics resulting from a continuously updated common draft might be more appropriate for popularity contests rather than for thorough deliberation. 
+
+
+
+
+-----
+
+As the process is deliberative, participatory and transparent, we believe it can be used to improve upon earthly democratic conduct at all stages of the legislation and budgeting process: By  legislation- and budget-drafting committees, to present to the legislature a legislation or budget that truly reflects the democratic will of the committee; by the legislature itself, to deliberate and express its democratic will precisely, rather than approve a take-it-or-leave-it text or budget;
+by an interest-group to propose legislation or a budget carrying the moral import of representing the group's democratic will; or by the electorate at large, in which case the process may be considered a delegative-democracy instance of Crowdlaw and Participatory Budgeting.
+
+The process assumes a potentially-unbounded set $\calD$ of alternative drafts (e.g. ordered lists of candidates, text drafts, draft budgets) and a set $E$ of edit operations (e.g. add or remove a candidate, insert or delete a sentence, change quantities of a budget item) that induce an edit-distance among alternatives. The process maintains a common draft, which initially reflects the status quo (e.g. the legislation to be amended, last year's budget, or an empty list of candidates) and proceeds in rounds, each including a deliberation step and a vote aggregation step.
+
+In the deliberation step, participants may review the common draft, ratify it or publish (possibly anonymously) an alternative to it, review other participant's alternative drafts, debate and deliberate them, and revise their own published alternative, even multiple times, as a result. Participants vote via their published draft, or else delegate their vote, by pointing either to the common draft or to a named published draft, in lieu of publishing their own.
+
+In the vote aggregation step, edit operations that decrease the distance of the common draft to a sybil-resilient supermajority of the published alternatives are exhaustively selected and applied to the common draft. 
+
+The process can conclude upon a range of predetermined conditions, including reaching consensus, electing a sybil-resilient Condorcet-winner, elapsing a time limit, or encountering a stalemate.  Upon conclusion, the final common draft replaces the initial common draft, but only if a sybil-resilient supermajority supports such a replacement; this is the case if consensus is reached or if a sybil-resilient supermajority ratifies the final common draft, but must be checked in other cases, possibly by an explicit vote.
+
+
+
+Structure of the paper:
+
+- Repeat abstract model of deliberative legislation, add sybil-resilience
+
+- Discuss instance to elections, compare to legislation of sets
+
+- Discuss instance to legislation, compare to legislation paper r.e. sybil resilience
+
+- Discuss instance to budgeting, compare to budgeting algorithm paper r.e. elicitation
+
+
+\subsection{Related Work}
+
+\udi{I propose to review here primarily RASC and the Spatial Model and any general approaches to deliberation etc.
+%
+ And review specific works on committee elections, e-budgeting and e-legislation in the background subsections of the corresponding sections}
+
+\nimrod{We shall cite this ``Social Choice Under Metric Preferences: Scoring Rules and STV'' as they do metric preferences and also they want to find the alternative which minimizes the sum (over voters) of distances; we want Condorcet; and more importantly, we say that we have the distances from the edit operations, while they just do distortion.}
+
+Our main motivation is to enable participatory legislation (see, e.g.,~\cite{ochoa2008relationship}) and our proposed process is, in essence, for collaborative text editing.
+The most famous related platform is Wikipedia, however it is not democratic~\cite{black2008wikipedia},
+%Other collaborative efforts of text editing, such as the white paper of Democracy Earth~\cite{whitepaperone},
+%which nevertheless also violates the one-person one-vote principle,
+%as can be seen by their explanation on its writing %process~\cite{whitepaperoneexplanation}.
+similarly to the Soylent text editor~\cite{soylent},
+in which the wisdom of the crowds is utilized to help in the writing process,
+however an omnipotent entity eventually decides on the end result (and thus, can, e.g., disregard the will of the society altogether).
+%
+Further examples for this line of efforts are the rewrite of Iceland's constitution (see, e.g., \cite{aitamurto2012crowdsourcing}, page 18),
+and the traffic law reform in Finland~\cite{govlabone}.
+
+Here, in contrast, we are interested in the true aggregation of drafts.
+Thus, we mention the now-inoperable platform MixedInk~\cite{slateone}, which was a combination of a rating system on top of a collaborative tool, with features such as merging documents.
+Another platform also not operating any more is Nick Beauchamp's Democratic Writing platform~\cite{nickone}.
+Last, we mention Madison\footnote{\url{http://keepthewebopen.com/about}}
+and the effort to integrate LiquidFeedback with version control systems~\cite{liquidone}.
+
+\journal{%
+Our framework builds on Reality-Aware Social Choice~\cite{realsoc},
+in that we maintain a certain Reality (i.e., status quo) which we amend according to participants' desires.
+In fact, our method builds on Distance-based Reality-aware Social Choice~\cite{realsoc},
+in that we consider distances between possible Realities and a voter prefers a draft which is closer to her over a draft which is farther away.
+Our envisioned process is related to that of Dryzek and List~\cite{dryzek2003social}, which aim to reconcile deliberation and voting.
+%Hartmann and Rad~\citeyear{hartmann2018voting} take an epistemological point of view and provide evidence that iterating deliberation and voting increases the probability of recovering the ground truth.
+}
+
+Our proposed process is for collaborative text editing.
+Perhaps the most famous platform for collaborative text editing is Wikipedia, however it is not democratic~\cite{black2008wikipedia}; in particular, it does not uphold ``one-person one-vote''.
+There are other collaborative efforts of text editing, such as the white paper of Democracy Earth,\footnote{The white paper is in \url{http://paper.democracy.earth}. For an explanation on their writing process, see \url{https:} \url{//github.com/DemocracyEarth/paper/blob/master/} \url{CONTRIBUTING.md}.}
+which nevertheless also violates the one-person one-vote principle.
+In such efforts, such as in the Soylent text editor~\cite{soylent},
+the wisdom of the crowds is utilized to help in the writing process,
+however an omnipotent entity eventually decides on the end result (and thus, can, e.g., disregard the will of the society altogether).
+%
+Further examples for this line of efforts are the rewrite of Iceland's constitution (see, e.g., \cite[page 18]{aitamurto2012crowdsourcing}),
+and the traffic law reform in Finland.\footnote{See \url{http://thegovlab.org/seven-lessons-} \url{from-the-crowdsourced-law-reform-in-finland/}.}
+
+Here, in contrast, we are interested in truly democratic text editing.
+Closer to this spirit, we mention the now-inoperable platform MixedInk, which was used, e.g., to suggest an inaugural speech for Barack Obama.\footnote{See \url{http://www.slate.com/articles/news_and_} \url{politics/politics/2009/01/mr_president_give_} \url{this_speech.html}.}
+MixedInk was a combination of a rating system on top of a collaborative tool such as Google Docs, with features such as merging documents.
+Another platform also not operating any more is Nick Beauchamp's Democratic Writing platform.\footnote{See~\url{http://www.nickbeauchamp.com/help.html}.}
+Last, we mention Madison\footnote{See \url{http://keepthewebopen.com/about}.}
+and the effort to integrate LiquidFeedback with version control systems.\footnote{See \url{http://www.liquid-democracy-journal.} \url{org/issue/4/The_Liquid_Democracy_} \url{Journal-Issue004-01-Democratic_Revision_} \url{Control_with_LiquidFeedback.html}.}
+
+Our main motivation is to improve citizen participation in high-stakes decision making processes, ultimately enabling participatory legislation (see, e.g.,~\cite{ochoa2008relationship}).
+
+Dryzek and List~\cite{dryzek2003social} aim to reconcile deliberation and voting.  Hartmann and Rad~\cite{hartmann2018voting} take an epistemological point of view and provide evidence that iterating deliberation and voting increases the probability of recovering the ground truth.  Their work addresses only binary decision, and it would be interesting to find out whether their analysis can be extended to ranked voting as proposed here for drafting legislation.
+
+
+
+\section{An e-Process that Integrates Proposal Making, Deliberation and Voting}\label{section:our process}
+
+Our \emph{e-process} (where the \emph{e} stands for both \emph{egalitarian} and \emph{electronic}) is akin to the Spatial Model~\cite{SpatialModel} in that the status quo, proposals to change it, and votes are all points in a multi-dimentional space, and preferences  are (almost) single-peaked, with the vote denoting the peak.  While the space has a distance measure -- edit-distance -- it is discrete rather than continuous.
+
+\nimrod{Regarding single-peakedness: It means single peak over 1-dimension; i.e., that you can order the alternatives on a one dimensional line and then each vote "chooses" a point on the line. I guess that we are simply "metric-based" but as far as I understand it is not formally a domain restriction (i.e., all profiles are possible). I'll think about it some more.}
+
+\udi{That's not my understanding.  Single-peak can be multidimensional.  Just that the theorem that relates it to Condorcet winner does not hold. 
+There are much more complex theorems, see the relavnt chapter in the book you sent me.}
+
+Our e-process begins with a given initial common draft, depicting the status quo.  It may be last year's budget, the current legislation if the wish is to amend it or, if this is a new topic, a clean slate -- the empty draft, e.g. an  empty committee.  The e-process proceeds in rounds, each consisting of a deliberation step followed by a voting step. 
+
+In the deliberation step,
+participants may propose (possibly anonymously) revisions to the common draft by publishing their private drafts,  and review, discuss, and debate the common draft as well as revisions proposed by other participants. The deliberation step can be as rich and as complex as desired. For example, participants could propose multiple revisions during this step, in order to present their developing ideas as well as to respond to ideas of others. Participants could communicate with each other informally, either off-channel or by commenting on and discussing the common draft as well as the revisions of each other. 
+
+In the vote aggregation step, the common draft is amended by applying to it all edit operations that have majority support. Participants do not vote explicitly on proposed edit operations; rather, they ``vote with their words'' by proposing their own revisions, namely publishing their private drafts:  A published draft implicitly votes for an edit operation to the common draft, or \emph{approves} it, if it makes the two drafts closer, a notion defined formally below.  A published draft \emph{ratifies} the common draft if it is identical to it.
+
+There is a spectrum of possible criteria to conclude the e-process, depending on the level of consensus wished for and the time that can be afforded.
+
+On one extreme, the process may conclude after the first round in which the common draft has not changed.  This means that in that round no change to the common draft had approval by the majority of the published drafts; technically, this means that the common draft is a weak Condorcet winner.  This may happen if no participant changed its published draft since the previous round, or if none of the changes induced a change that has majority support. One difficulty with such outcome is that it may reflect an awkward compromise, where nobody is happy with the elected common draft, but support for improving it is fragmented among multiple edit proposals, none having majority support.  Hence, the process gives preference to the initial draft, which depicts the status quo~\cite{realsoc}:  The final elected common draft must be preferred by a majority of the participants over the initial common draft, or else the process is annulled and the status quo is retained.
+
+On the other extreme, deliberation concludes only when consensus has been reached and all participants have ratified the common draft.  This ideal conclusion of deliberation is not always attainable.  A sensible criterion in between these two extremes is to conclude the process when the majority of the published drafts have ratified the common draft.  Technically, this implies that the common draft is a (strong) Condorcet winner and hence is preferred over all other drafts, including the initial common draft.  
+As conclusion according to any of these criteria cannot always be reached, a time limit can be added:
+  If no conclusion according to the chosen criterion has been reached by the time limit, then the final common draft is elected if a majority prefers it over the initial common draft.
+
+\udi{We need to discuss why we need a final vote - the reason is that even a weak Condorcet winner may not be preferred over the status quo since the "prefers" relation is not quite true - people do not really prefer drafts closer to them}
+
+\section{The Deliberation Step}\label{section:deliberation step}
+
+Our model of deliberation is simple and open-ended:  At each point in time there is a common draft, which reflects the will of the participants at that time.  In addition, each participant may propose, possibly anonymously, revisions to it, by publishing its private draft. Together, the common draft and the participants' published drafts offer the basis for deliberation:  A participant can compare the common draft to its private draft and be influenced by it, for example by accepting changes that make its private draft commensurate with the public draft; or, by modifying its private draft to be a more effective alternative to the common draft.  Similarly, a participant may compare its private draft to the draft published by a respected opinion-leader and accept changes to its private draft that harmonize the two; alternatively, a participant may compare its draft with that of an opposition leader, in order to sharpen its own position.  All these activities can be carried out in private, without any communication except the publication of drafts by participants.
+
+In addition, multiple communication channels can be used to support discussion among participants, as well as among ``coalitions'' of participants that wish to coordinate the promotion of a common agenda.  Our approach and process are agnostic to the particular communication channels chosen and the way they are employed, provided that the outcome of the deliberation is the (potentially ongoing) revision and publication of drafts by the participants.
+
+While the process affords deliberation, it cannot enforce it, as participants may be oblivious to each other and never revise their published drafts. If participants are oblivious, initially or eventually before the desired conclusion condition has been reached (be it consensus or a Condorcet winner), then the process may reach a stalemate, as discussed above.
+
+
+\section{The Vote Aggregation Step}
+\label{section:voting step}
+
+\nimrod{So this seems like the beginning..}
+
+\nimrod{And the essence could be: We consider metric preferences, specifically edit-distance-based metric preferences. We assume each voter specifies only her ideal point in the space. We look for Condorcet winners. We spell certain conditions on the edit operations which guarantee the existence of a Condorcet winner and a way to find it using a hill-climbing algorithm. We then demonstrate how to embed (1) committee elections (2) line budgeting and (3) legislation, within this framework.}
+
+The voting step commences with a given common draft and published drafts, and aims to update the common draft to reflect the preferences of the participants, as expressed by their published drafts. We emphasize that while the mathematics presented in this section may be beyond the grasp of most voters and so would any software implementation of it, voting with this system is trivial:  Participants propose a revision to the common draft by publishing a private draft different from it, or ratify the common draft by publishing a draft identical to it (or``pointing" to it, a form of vote delegation discussed below).  The rest, which is described in this section, happens ``under the hood''.
+
+In this section we consider drafts, edit operations, and implicit voting with drafts abstractly, without specifying the structure of drafts or how edit operations affect them; in the following sections we specify the structure of drafts and consider specific edit operations, ultimately leading to the three scenarios of committee elections, budgeting and legislation.
+
+ We see value in this abstract exposition as it highlights certain properties of sets of edit operations which influence the computational complexity and the properties of our process.
+
+\begin{definition}
+%
+We assume a potentially infinite set of \emph{drafts}, $\calD$, and a given set of \emph{edit operations} on drafts, $E: \calD \rightarrow \calD$. Each edit operation $e \in E$ has a \emph{cost}, $\cost(e) > 0$,  which is additive, so for any $E' \subset E$, $\cost(E') = \sum_{e \in E'} \cost(e)$. The draft resulting from applying an edit operation $e \in E$ on  $c \in \calD$ is denoted by $e(c)$.  The \emph{edit distance} between two drafts $c, c' \in \calD$, $\dist(c, c')$, is the minimal cost $\sum_{i \in [n]} \cost(e_i)$ of any finite sequence of edit operations $e_1, e_2, \ldots e_n$, $n \ge 0$, that convert $c$  to $c'$, $e_n(\ldots(e_2(e_1(c)))\ldots) = c'$.\qqed  
+%
+\end{definition}
+
+This model is an instance of Distance-based Reality-aware Social Choice~\cite{realsoc}, where voters preferences are determined by the edit-distances implied by their published drafts:  A published draft prefers a close draft over a distant draft.
+
+\begin{definition}[Prefers]\label{lemma:prefers}
+%
+Let $d, c, c' \in \calD$ be drafts.  We say that  $d$ \emph{prefers}  $c$ to $c'$, $ c \prefers{d} c'$, if $\dist(d, c) < \dist(d, c')$.\qqed
+\end{definition}
+
+A Condorcet-winner of a set of drafts is a draft $c$ such that for any other draft $c'$, the majority prefers $c$ over $c'$.  An $\epsilon$-Condorcet winner is a draft that is $\epsilon$-away from a Condorcet-winner.
+
+\begin{definition}[Condorcet-winner, Condorcet-consistent]\label{lemma:condorcet-winner}
+%
+Let $D \subset \calD$ be a finite set of drafts. A draft $c \in \calD$ is:
+%
+\begin{itemize}
+
+\item
+a \emph{Condorcet-winner} of $D$ if, for any other draft $c' \in \calD$: \\ $|\{ d \in D : c \prefers{d} c' \}| > |\{ d \in D : c' \prefers{d} c \}|$.
+
+\item
+an \emph{$\epsilon$-Condorcet-winner} of $D$, for $\epsilon > 0$, if there is a Condorcet-winner $w \in \calD$ of $D$ and $\dist(c,w) < \epsilon$.
+
+\end{itemize}
+%
+A voting process is \emph{Condorcet-consistent} if it elects a Condorcet-winner whenever such exists.
+A voting process is \emph{$\epsilon$-Condorcet-consistent}, for $\epsilon > 0$, if, whenever there is a Condorcet-winner, it elects an $\epsilon$-Condorcet-winner.\qqed 
+\end{definition}
+
+The term \emph{weak Condorcet-winner} is obtained from its unqualified counterpart by replacing $>$ by $\ge$ in Definition \ref{lemma:condorcet-winner}; then, the terms \emph{weak $\epsilon$-Condorcet-winner}, \emph{weakly Condorcet-consistent}, and \emph{weakly $\epsilon$-Condorcet-consistent} follow.
+
+\begin{observation}\label{observation:coincides}
+%
+If there is an $\epsilon >0$ for which $\cost(e) \ge \epsilon$ for all $e \in E$, then if two drafts $c, c' \in \calD$ are less than  $\epsilon$ apart they must be identical, and hence the notions of Condorcet-winner and $\epsilon$-Condorcet-winner coincide, and so do the notions of Condorcet-consistent and $\epsilon$-Condorcet-consistent.
+ 
+The corresponding weak notions coincide similarly.
+%
+\end{observation}
+
+Next we describe an implicit-vote aggregation algorithm. Votes are ``implicit'' in that voters do not cast explicit votes on every possible transition from the status quo -- they simply state their opinions by publishing their private drafts.  We deduce each voter's preference on each edit operation by computing the impact of the edit operation on the distance of the common draft to the voter's published draft: A voter approves an edit operation if it decreases the distance of the common draft to its published draft.
+
+\begin{definition}[Approves, Majority approval]
+%
+Given a set of published drafts $D$ and a draft $c \in \calD$,  we say that $d \in D$ \emph{approves} the edit operation $e$ on $c$ if it prefers $e(c)$ to $c$, namely $e(c) \prefers{d} c$.  An edit operation $e$ on $c$ has \emph{majority approval} by $D$ if $|\{d \in D : e(c) \prefers{d} c| > \frac{1}{2}{|D|}$.\qqed 
+%
+\end{definition}
+
+\begin{algorithm}[Implicit-Vote Aggregation]\label{algorithm:iva}
+With a set of edit operations $E$ on $\calD$, a finite set of drafts $D \subset \calD$, an initial common draft $c \in \calD$,  and an $\epsilon > 0$, the algorithm proceeds in rounds to elect a draft $w \in \calD$.   In each round, an edit operation $e \in E$, $\cost(c) \ge \epsilon$,  with majority-approval by $D$ is arbitrarily picked and applied to $c$, setting $c := e(c)$;
+if no such edit operation exists, then the process elects $w:=c$ and halts.
+\end{algorithm}
+
+First we show that Implicit-Vote Aggregation halts if the set of edit operations is closed under inversion.
+
+\begin{definition}
+%
+A set of edit operations $E$ on $\calD$ is \emph{closed under inversion} if each edit operation $e \in E$ has an inverse $e' \in E$ such that $\cost(e)=\cost(e')$ and if $e(d) \ne d$ then $e'(e(d)) = d$ for any  $d \in \calD$.\qqed
+%
+\end{definition}
+
+
+\begin{lemma}\label{lemma:inverse}
+Let $E$ be a set of edit operations which is closed under inversion and $e \in E$ some edit operation.
+Let $D$ be a set of drafts and 
+$d \in D$ some draft.
+Then,
+if $d$ is a Condorcet-winner of $D$ and $e(d)$ is not,
+then applying $e^{-1}$ to $e(d)$ has majority approval by $D$.
+\end{lemma}
+
+\begin{proof}
+%
+Since $d$ is a Condorcet-winner and $e(d)$ is not, they are distinct, hence by definition of Condorcet-winner there is a majority that prefers $d$ over $e(d)$.  This majority would approve any edit operation that takes $e(d)$ to $d$, in particular it would approve $e^{-1}$.
+%
+\end{proof}
+
+\begin{lemma}\label{lemma:stops}
+If the set of edit operations $E$ is closed under inversion then Algorithm \ref{algorithm:iva} halts.
+\end{lemma}
+
+\begin{proof}
+%
+We show that the sum of distances between all published drafts $D$ to the common draft $c$ decreases in each iteration by at least $\epsilon >0$; since this sum cannot be negative, the process cannot continue indefinitely. Consider an iteration in which the common draft is $c$ and an edit operation $e \in E$ is chosen, and let us investigate the effect of $e$ on $\sum_{d \in D} \dist(d, c)$.   Let $D^-$ be the  set of drafts that approve $e$ (since it decreases their distance to $c$), $D^- = \{d \in D: e(c) \prefers{d} c\}$,  and let $D^+$ be the set of drafts that do not approve $e$, $D^+ = D \setminus D^-$.  Since $e$ has an inverse with the same cost, it can increase the distance between $c$ and any $d \in D$ by at most $\cost(e)$.
+Hence,  $D^+$ may contribute a distance increase of at most $|D^+| \cdot \cost(e)$, whereas  $D^-$  contributes a distance decrease of exactly $|D^-| \cdot \cost(e)$. 
+Since $e$ is majority-approved, $|D^-| > |D^+|$.   Hence  $\sum_{d \in D} (\dist(d, e(c)) -\dist(d,c)) \le |D^+| \cdot \cost(e) -  |D^-| \cdot \cost(e)  = (|D^+| - |D^-|) \cdot \cost(e) \le  -\cost(e) \le - \epsilon < 0$.  The sum of the distances indeed decreases in each iteration by at least $\epsilon >0$ and therefore the algorithm halts.
+%
+\end{proof}
+
+The proof above also implies the following corollary, as it shows in particular that in each round the total cost decreases by at least $\epsilon$.
+
+\begin{corollary}
+  If the set of edit operation $E$ is closed under inversion then the number of rounds of Implicit-Vote Aggregation is at most $\epsilon^{-1} \cdot \sum_{d \in D} \dist(d, c)$, where $c$ is the initial draft. 
+\end{corollary}
+
+We consider another property of sets of edit operations, namely lack of a local maximum. This property would be helpful in showing properties of our voting procedure.
+
+\begin{definition}
+%
+A set of edit operations $E$ is \emph{free of local maxima} if, for any $\epsilon > 0$, it holds that for any set of drafts $D \subset \calD$ that has a Condorcet-winner and any draft $c \in \calD$, either $c$ is an $\epsilon$-Condorcet-winner of $D$ or $c$ has an edit operation $e \in E$ with $\cost(e) \ge \epsilon$ and majority approval by $D$.\qqed
+%
+\end{definition}
+
+Next we show that Implicit-Vote Aggregation is $\epsilon$-Condorcet-consistent under the above conditions. The proof follows the observation that Implicit-Vote Aggregation can be seen as a local search algorithm, and so, if the set of edit operations is free of local maxima, then a local search would find the global maximum.
+
+\begin{lemma}\label{lemma:IIAV-epsilon-condorcet}
+If the set of edit operations $E$ is closed under inversion and free of local maxima then Algorithm \ref{algorithm:iva} is $\epsilon$-Condorcet-consistent.
+\end{lemma}
+
+\begin{proof}
+%
+We need to show that Algorithm \ref{algorithm:iva} elects an $\epsilon$-Condorcet-winner assuming $D$ has is Condorcet-winner,  $E$ is closed under inversion and is free of local maxima.
+Since $E$ is closed under inversion, the process halts according to Lemma \ref{lemma:stops}.  Let $w$ be the common draft it elects before it halts and assume, by way of contradiction, that $w$ is not an $\epsilon$-Condorcet-winner of $D$.  Since $E$ has no local maxima then, by definition, there is an edit operation $e \in E$ to $w$, $\cost(e) > \epsilon$, with majority approval by $D$.  This violates the termination condition of the algorithm and hence it cannot elect $w$ and halt, a contradiction.   Therefore, the elected draft $w$ is an $\epsilon$-Condorcet-winner.\qqed
+%
+\end{proof}
+
+\begin{corollary}\label{corollary:IIAV--condorcet}
+If the set of edit operations $E$ is closed under inversion, free of local maxima, and there is an $\epsilon > 0$ such that $\cost(e) \ge \epsilon$ for every $e \in E$, then Algorithm \ref{algorithm:iva} is Condorcet-consistent.
+\end{corollary}
+
+\begin{proof}
+%
+Due to Lemma \ref{lemma:IIAV-epsilon-condorcet} the algorithm stops and elects an $\epsilon$-Condorcet-winner $c$, which has a distance $\le \epsilon$ from some Condorcet winner $c'$.
+Since no edit operation has cost $< \epsilon$ then, according to Lemma \ref{observation:coincides}, $c$ and $c'$ coincide.  Hence the algorithm elects a Condorcet-winner.\qqed
+%
+\end{proof}
+
+\begin{remark}
+%
+To keep the paper focused, we concentrate on Condorcet-consistency. We mention, however, that Lemma~\ref{lemma:IIAV-epsilon-condorcet} and Corollary~\ref{corollary:IIAV--condorcet} can be stated in stronger terms, as follows. If the set of edit operations $E$ is closed under inversion and free of local maxima then Implicit-Vote Aggregation is Smith-consistent, which means that it is guaranteed to return a draft that is contained in the Smith set.  The Smith-set is a minimal set of drafts for which each draft in the set is majority-preferred to each draft not in the set. Smith-consistency is a strict generalization of Condorcet-consistency as, in particular, if there is a Condorcet-winner then the Smith set is a singleton containing only the Condorcet-winner and if there are weak Condorcet-winners then the Smith set contains only those.
+%
+\end{remark}
+
+
+\section{An e-Process for Committee Election}
+\label{section:commiteee election}
+
+
+\subsection{Background}
+
+In committee elections the goal is to elect a committee. The usual model assumes that the size of the committee is known ahead.
+Here we concentrate first on the other case, where the size of the committee is not given, but shall be derived from the voter preferences. There are some papers studying this model as well~\cite{kilgourvnw,vnw}.
+We concentrate on this model as the mathematical treatment is slightly simpler for it. We then also consider the more standard model in which the size of the committee to be elected is given upfront.
+
+There is a blast of literature on such elections in computational social choice in recent years. There is a book chapter~\cite{mwchapter} about this subject. Such elections and corresponding rules have been studied from an axiomatic point of view~\cite{propertiesofmw,csrhierarchy}, experimental point of view~\cite{mw2d}, and computational point of view.
+
+There are some papers about dependencies between committee members~\cite{interintra} and some regarding diversity issues~\cite{aziz2018rule,BFIa}.
+
+
+[Discuss deliberative aspect, dependencies etc.]
+
+
+
+
+So far the discussion was set in abstract terms, without commitment to the structure of drafts nor to the specific edit operations.
+Here we discuss the concrete example of committee election, where we view drafts as finite sets\footnote{In fact, our process extends naturally to multisets, and in particular all proofs carry over to this more general setting; for ease of presentation, we concentrate on the simpler setting of sets with no multiplicities.} of atomic elements, and consider two edit operations: inserting a candidate and deleting a candidate. 
+
+In the context of committee election, the elements are candidates. In the budgeting and legislation domains discussed below, the elements are budget items and sentences, respectively.
+
+\subsection{Edit operations on sets}
+
+\begin{definition}[Editing a set with insert and delete]
+Let $\calS$ be the set of all elements and $\calD_S$ the set of all drafts, which are finite sets of elements of $\calS$,   $\calD_S = \{S: S \subset \calS, |S| < \infty\}$. The set of edit operations $E_\calS: \calD_\calS \rightarrow \calD_\calS$ contains, for each $s \in \calS$, the unit-cost operations $\iinsert{s}$ and $\ddelete{s}$, defined by
+$\iinsert{s}(d) = d \cup \{s\}$ and $\ddelete{s}(d) = d \setminus \{s\}$, for any $d \in \calD$.\qqed
+\end{definition}
+
+Note that $E_\calS$ is closed under inversion, as $\iinsert{s}(\ddelete{s}(d)) = d$, and $\ddelete{s}(\iinsert{s}(d)) = d$ if $s \notin d$, $\ddelete{{s'}}(\iinsert{s}(d)) = d$ if $s \in d$ $s' \notin d$, with an operation and its inverse being of equal (unit) cost.  
+
+Also, note that the edit distance among members of $\calD_S$ is the size of their symmetric difference:  $\dist(d,d') = |d \triangle d'|$ for any $d, d' \in \calD_S$. Hence,
+$d \in \calD_S$ approves the edit operation $e$ on draft $c \in \calD_S$ if $e(c) \prefers{d} c$, namely  $\dist(c, e(d)) < \dist(c, d)$, which in this case holds if $|c \triangle e(d)| < |c \triangle d|$.  This can happen either if $e = \iinsert{s}(d)$ for $s  \in c \setminus d$, or if $e = \ddelete{s}(d)$ for $s  \in d \setminus c$. 
+
+
+\subsection{Majoritarian sets and weak Condorcet-winners}
+
+Preparing for the following lemma, recall that, since the cost of each edit operation in $E_\calS$ is $1$, then according to Observation~$\ref{observation:coincides}$, the notions of weak Condorcet-winner and weak $1$-Condorcet-winner coincide.
+
+\begin{definition}[Majoritarian set]\label{definition:majoritatian-set}
+%
+Let $D \subset \calD$ be a finite set of drafts. Then, the \emph{majoritarian set} of $D$, $m_D$, is the set of elements which are members of a majority of the drafts in $D$, $mD = \{s: |d \in D : s \in d| > \frac{1}{2}{|D|}\}$.\qqed
+%
+\end{definition}
+
+The corresponding notions of \emph{weak majoritarian set} of $D$, and $\textrm{weak-}m_D$, are obtained from Definition \ref{definition:majoritatian-set} by replacing in it $>$ by $\ge$.
+
+Notice that $m_D \subseteq \textrm{weak-}m_D$.
+
+\begin{lemma}[Majoritarian $\rightarrow$ weak Condorcet-winner]
+\label{lemma:condorcet-majoritarian}
+The majoritarian set $m_D$ of a set of drafts $D \subset \calD$ is a weak Condorcet-winner of $D$.
+\end{lemma}
+
+\begin{proof}
+%
+By way of contradiction, assume that $m_D$ is not a weak Condorcet-winner of $D$.  Then there is another draft, say $c_1$, which a majority of $D$ prefer over $m_D$.  
+Let $e_1, e_2, \ldots e_n$, $n \ge 1$, be a minimal set of edit operations that transform $c_1$ to $m_D$,  let $c_{i+1} = e_i(c_i)$, $ i \in [n]$, with $m_D = c_{n+1}$. Consider the first $i \in [n]$ for which the majority prefers $c_i$ over $m_D$ but not $c_{i+1}$.  Since $c_1$ is preferred over $m_D$ by assumption and $c_{n+1} = m_D$ is not preferred to itself, such an $i$ must exist.   
+%Since the set of edit operations is minimal, then $e_i$ reduces the distance between $c_i$ and $m_D$.
+There are two cases to consider: One, $e_i = \ddelete{s}(c_i)$ for some $s \in \calS$.  As the sequence of edit operations is minimal,  $s \notin m_D$, which means that $s$ is not a member of the majority of $D$.  Hence, there is majority approval by $D$ for $e_i = \ddelete{s}(c_i)$.
+Two, $e_i = \iinsert{s}(c_i)$.  As the sequence of edit operations is minimal,  $s \in m_D$, which means that $s$ is a member of the majority of $D$.  Hence, there is majority approval by $D$ for $e_i = \iinsert{s}(c_i)$.  In either case, $e_i$ reduces the distance of $s_i$ to the majority of $D$. Hence, if the majority prefers $s_i$ to $m_D$, it must prefer also $s_{i+1}$ over $m_D$, a contradiction.
+%
+\end{proof}
+
+\begin{lemma}
+  Let $D \subset \calD$ be a finite set of drafts.
+  Then, the set of weak Condorcet-winners of $D$ equals to $\{ d : d = m_D \cup d'  \textrm{ such that }  d' \subseteq \textrm{weak-}m_D \setminus m_D \}$.
+\end{lemma}
+
+\begin{proof}
+%
+Let us denote the set of weak Condorcet-winners of $D$ by $C$ and the set $\{ d : d = m_D \cup d'  \textrm{ such that }  d' \subseteq \textrm{weak-}m_D \setminus m_D \}$ by $W$. Next we show that $C = W$.
+
+First we show that $C \subseteq W$.
+To this end, assume, by way of contradiction, that there is some $c \in C \setminus W$. Thus, in particular $c$ either (1) contains some $d$ which is not contained in a majority of the drafts or (2) does not contain some $d$ which is contained in a majority of the drafts.
+For case (1), a majority of the drafts prefers  $c \setminus \{d\}$ over $c$, contradicting $c$ being a Condorcet winner. For case (2), a majority of the drafts prefers $c \cup \{d\}$ over $c$, again contradicting $c$ being a Condorcet winner.
+
+Next we show that $W \subseteq C$.
+To this end, assume, by way of contradiction, that there is some $w \in W \setminus C$. Thus, in particular $w$ is not a Condorcet winner, so there is some Condorcet winner $c$ such that a majority of the drafts prefer $c$ over $w$. Since $c \neq w$, either (1) there is some $d \in c \setminus w$ or (2) there is some $d \in w \setminus c$.
+For Case (1), a majority of the drafts prefers $c \setminus \{d\}$ over $c$ contradicting $c$ being a Condorcet winner.
+For Case (2), a majority of the drafts prefers $c \cup \{d\}$ over $c$, again contradicting $c$ being a Condorcet winner.
+%
+\end{proof}
+
+\begin{example}
+%
+Assume that $D = \{ \{a\}, \{b\} \}$.
+Then, the set of Condorcet-winners is
+$\{ \emptyset, \{a\}, \{b\}, \{a,b\} \}$, since in such an extreme case of total disagreement, no majority prefers any set over any of these sets.
+Furthermore, the set $\textrm{weak-}m_D = \{a, b\}$ is the weak-majoritarian set, and the set $m_D = \emptyset$ is the majoritarian set.
+%
+\end{example}
+
+\subsection{Electing a Condorcet-winning set in polynomial time}
+
+Next we show certain properties of our process, implying that it selects a Condorcet-winner in polynomial time.
+
+\begin{lemma}
+  The set of edit operations $E_\calS$ is free of local maxima.
+\end{lemma}
+
+\begin{proof}
+%
+Let $D \subset \calD_S$ be a finite set of drafts and $m_D$ the majoritarian set of $D$, which, by Lemma \ref{lemma:condorcet-majoritarian}, is a Condorcet-winner of $D$.  Let $c \in \calD$ be a draft that is not a Condorcet-winner of $D$. We must show that
+$c$ has an edit operation $e \in E_S$ with majority approval by $D$. Consider any  element $s$ in the symmetric difference,  $s \in c \triangle m_D$.
+There are two cases: One, $s \in c \setminus m_D$. Then $s$ is not a member of the majority of $D$, and therefore there is majority approval by $D$ for its deletion from $c$.
+Two, $s \in m_D \setminus c$. Then $s$ is a member of the majority of $D$, and therefore there is majority approval by $D$ for its insertion to  $c$. In either case, there is an an edit operation to $c$ with majority approval by $D$.
+%
+\end{proof}
+
+\begin{lemma}
+Implicit-Vote Aggregation, applied to $E_\calS$,  a finite set of drafts $D \subset \calD_S$ and the initially-empty common draft $c = \emptyset$, elects $m_D$ in $|m_D|$ iterations.
+\end{lemma}
+
+\begin{proof}
+Note that at each round of the algorithm the edit operations to $c$ with majority approval by $D$ are exactly $\{\iinsert{s}(c) : s \in m_D \setminus c\}$.
+\end{proof}
+
+\begin{definition}[$2$-way consistency]
+Let $D \subset \calD$ be a finite set of drafts. A draft $c \in \calD$ is \emph{$2$-way consistent} with $D$ if for every $\{a,b\} \subseteq c$, there is a draft $d \in D$ for which $\{a,b\} \subseteq d$.\qqed
+\end{definition}
+
+The next corollary follows by the fact that $m_D$ is $2$-way consistent (see Lemma \ref{lemma:wm-nwc}).
+
+\begin{corollary}
+Implicit-Vote Aggregation, applied to $E_\calS$, is a polynomial-time, Condorcet-consistent, $2$-way consistent draft aggregation method.
+\end{corollary}
+
+\nimrod{So this is almost the same as MV of VNW:
+  In VNW, MV returns one committee containing all candidates with at least half approval scores; here we can return this committee, but we can actually choose which of the alternatives which get exactly half we include and which we do not, as they do not matter (all of the resulting committees will be weak condorcet winners due to this tie of half half).}
+
+
+\subsection{Committee Selection with $k$}
+
+So when the size of the committee is given as $k$, what shall we do?
+
+So we view each possible ideal point as a member of $[m]_k$ and similarly each possible outcome is a member of $[m]_k$.
+
+The edit operations insert and delete do not make sense now, but we shall have only one edit operation: \emph{swap}(a, b) which, well, swaps a for b.
+
+It is clear that this set of (only one) edit operation is closed under inversion because applying swap(b,a) after applying swap(a,b) results in the initial committee.
+
+It also looks like this set of edit operation is free of local maxima as the approval winning committee (the committee which has the highest-scoring candidates) is a condorcet winner:
+  The proof follows the same lines as before.
+Now, since this is the condorcet winner, again as before we can show that it is free of local maxima (in short: we look at some c which is not condorcet and at the approval-winning-committee which is; then, we observe that we shall do a swap because it is good for many voters, so we do it and reach a contradiction.).
+
+So we have a nice instantiation of our framework for $k$-committee selection.
+
+
+\subsection{Discussion}
+
+Discuss committee voting in the context of other approaches - pros cons etc.
+
+Unbounded committee - can add bounds
+
+\nimrod{When you say bounds you mean selecting a committee of a given size $k$, yes? Are you sure that everything goes through similarly for bounded committees?}
+
+
+\section{An e-Process for Budgeting}
+\label{section:e-process budgeting}
+
+
+\subsection{Background}
+
+Perhaps the most popular budgeting method is $k$-Approval~\cite{goel2015knapsack} which also considers Knapsack voting, where voters specify items that they approve of (a set of $k$ items in $k$-approval and a set respecting the budget limit in Knapsack voting); the winning budget is then selected greedy according to approval scores.
+%
+Benade et al.~\cite{benade2017preference} studies elicitation methods for participatory budgeting.
+
+A normative approach to guide the design of novel budgeting was taken in recent papers~\cite{condorcetbudgeting,aussieone}.
+Specifically, in a recent work~\cite{condorcetbudgeting}, we defined Condorcet-winning budgets by generalizing the Condorcet principle, and developed an efficient algorithm, which, under certain assumptions, is able to find such budgets whenever they exist.
+%
+In contrast to this majoritarian approach, proportional methods have been proposed~\cite{aussieone}.
+
+Fain et al.~\cite{fain2016core} have also considered proportional budgeting methods;
+studying a general setting that, in particular, generalizes participatory budgeting have shown that some of the algorithms proposed by Flushnik et al.~\cite{fluschnik2017fair},
+who performed an algorithmic study of fairness in certain multiagent versions of Knapsack,
+satisfy certain axiomatic properties.
+
+
+\subsection{Line item budgets}
+
+Budgeting has a long tradition of constructing an annual budget as a modification of last year's budget.  The standard representation that facilitates such comparison is called a \emph{line item budget}, where each line has the name of a budget item and its budgeted cost.  A line item budget is typically organized hierarchically according the the organization's structure.  For simplicity, we will employ a flat structure; but it could easily be made hierarchical to accommodate hierarchical budget construction.
+
+\nimrod{Do you know how to make it work for hierarchical budget?}
+
+\begin{definition}[Line item budget draft]
+Assume a given set of \emph{budget items} $\calB$. A \emph{budget line} is a pair $(b,n)$, where $b \in \calB$ is a budget item and $n \in \mathcal{N}$ is its budgeted cost.  A \emph{line item budget draft} $d$ is a finite set of budget lines, each with a distinct budget item.
+\qqed
+\end{definition}
+
+
+The requirement that each budget line has a distinct budget item in effect makes a line item budget an indexed set of budgeted costs, with the indices being
+budget items.  Hence the following definition.
+
+
+\begin{definition}[Budgeted cost of an item]
+Let $d$ be a budget draft and $b \in \calB$  any budget item. The \emph{budgeted cost} $d_b$ of $b$ in $d$ is $n$ if $(b,n) \in d$, else 0.
+\qqed
+\end{definition}
+
+
+\subsection{Edit operations on line item budget drafts}
+
+\nimrod{So here we say that we view it as a multiset (and mention that it is OK complexity-wise).}
+
+\nimrod{So each ideal point is a multiset over the elements which are the lines in the budget and the multiplicity of each element/line is the number of bucks spent on it.}
+
+\nimrod{The edit operations are those on multisets: increase-multiplicity(a) and decrease-multiplicity(a) which can be renamed also: insert(a) and delete(a).}
+
+\nimrod{Closeness under inversion is clear as insert(delete(a)) = delete(insert(a)) = a (with abuse of notation.}
+
+\nimrod{Free of local maxima: This also should hold because:
+  (1) we can treat each line separately and then the condorcet winner is to select the median (!!!) in each line
+  (2) given a non-condorcet-winner and a condorcet-winner we can choose one line for which they differ and then go towards the median by one operation which will be preferred so contradiction would follow.}
+  
+\nimrod{So we have it also here..}
+
+The most natural operations on a budget draft (e.g. preparing next year's budget by updating last year's budget) is adding or subtracting costs to budget items. Note that adding a cost to a non-existent budget item also adds the item to the budget, and reducing the cost of a  budget item to zero effectively removes that item from the budget.
+
+\begin{definition}[Editing a line item budget draft with add and subtract]
+Let $\calB$ be the set of budget items and $\calD_B$ the set of all line item budget drafts. The set of edit operations $E_\calB: \calD_\calB \rightarrow \calD_\calB$ contains, for each $b \in \calB$ and $n \in \calN$, the $n$-cost operations $\add{(b,n)}$ and $\subtract{(b,n)}$, defined as follows: 
+\begin{itemize}
+    \item $\add{(b,n)}(d) = d \setminus \{(b,d_b)\} \cup \{b,(d_b+n)\}$.
+    \item $\subtract{(b,n)}(d) = d \setminus \{(b,d_b)\} \cup \{(b,n')\}$, where $n' = \textrm{max}(d_b-n,0)$.\qqed
+\end{itemize}
+\end{definition}
+
+Note that $E_\calB$ is also closed under inversion, as $\subtract{(b,n)}(\add{(b,n)}(d)) = d$, and $\add{(b,n')}(\subtract{(b,n)}(d)) = d$ where $n' = \textrm{max}(n,d_b)$.
+
+\nimrod{Formally I think that it is not closed under inversion: Our definitions says that there should be an inverse operation \textbf{of the same cost}, but if we subtract below zero than the inverse operation will be cheaper.. Perhaps in the definition of closed under inversion we can have "at most" instead of "equal"?}
+
+Also, note that the edit distance among any two draft budgets  is the sum of the absolute differences among their budgeted costs of line items.  So, for any  $d, d' \in \calD_B$:
+$$
+\dist(d,d') = \sum_{b \in B} |d_b - d'_b|  
+$$.
+
+Hence,
+$d \in \calD_B$ approves the edit operation $e$ on draft $d' \in \calD_B$ if $e(d') \prefers{d} d'$, namely  $\dist(d, e(d')) < \dist(d, d')$, which in this case holds if
+$$
+\sum_{b \in B} |d_b - e(d')_b| <
+\sum_{b \in B} |d_b - d'_b|
+$$
+ This can happen either if $e = \add{(b,n)}$ and 
+ $|(d_b + n) - d'_b| < |d_b - d'_b|$, 
+ or if 
+ $e = \subtract{(b,n)}$   and
+ $|(d_b - n') - d'_b| < |d_b - d'_b| $, 
+ where $n' = \textrm{max}(d'_b - n, 0)$.
+
+[Check and Repeat the logic of the previous section on sets here on draft budgets]
+
+\nimrod{I checked the logic it's fine. I didn't continue because I had this thought: This model of line budgets is actually similar to multiset: For example, a line budget with, say, $\{(b, 2), (b', 3)\}$ can be modeled by a multiset $\{b, b, b', b', b'\}$ and then we can have two operations of $add(b)$ and $subtract(b)$. Then it is maybe covered by committee elections?}
+
+\nimrod{Also, what exactly do we need to show in this section: Only that it is closed under inversion and free of local maxima, no?}
+
+
+\section{An e-Process for Legislation}
+\label{section:e-process legislation}
+
+\subsection{Background}
+
+[Related work on e-legislation]
+
+Our second domain of application of the e-process is legislation.
+We view the legislation \emph{text} as a string (i.e., finite sequence) over the infinite alphabet of sentences, and consider the text editing operations of inserting a sentence in a specific location in the text, deleting a sentence from a specific location in the text, and permuting the order of two adjacent sentences in a text. While we assign the cost of $1$ to \emph{insert} and \emph{delete}, we set the cost of permuting two sentences of a string of length $n$ to $\frac{1}{n^2}$.  That is, we give higher weight to getting the right set of sentences, and lower weight to ordering them correctly. 
+
+A string of length $n$ can be set in a chosen order with at most ${n^2}$ \emph{permute} operations at a cost of no more than $1$. This suggests using the methods developed fro committee election in Section~\ref{section:commiteee election} for sets (or multisets) of sentences to first get the right sentences into the common draft, so it is within a distance of $1$ to a Condorcet winner that is an ordered majoritarian draft, and then reducing the distance further by permuting the sentences.\footnote{
+Notice that sometimes deferring all the permute operations to the end is not optimal; e.g., to go from the draft $ab$ to the draft $bca$, it is better to first permute the adjacent $a$ and $b$ and only then insert $c$ between them.} Specifically, here we assume a process in which sentences are first elected and then ordered.
+
+\subsection{First vote-aggregation step: Electing the right sentences}
+
+\begin{definition}[Editing text with insert, delete and permute]
+Let $\calS$ be the set of all sentences and $\calT_\calS$ the set of all drafts, which are strings of sentences of $\calS$,   
+$\calT_\calS = \{s_1\cdot s_2 \cdot \ldots  s_n : s_i \in \calS, i \in [n]\}$. The set of edit operations $E_\calT: \calT_\calS \rightarrow \calT_\calS$ contains, for each draft $t = s_1\cdot s_2\cdot \ldots s_n \in \calT_\calS$ of length $|t|=n$ and each sentence $s \in \calS$, the unit cost operations $\iinsert{{s, i}}$, $i \in [n + 1]$, and $\ddelete{i}$, $i \in [n]$, and the $\frac{1}{n^2}$-cost operation $\permute{i}$, $i \in [n - 1]$, defined as follows:
+%
+\begin{itemize}
+
+\item
+$\iinsert{{s, i}}(t) = s_1\cdot \ldots s_i\cdot s\cdot s_{i + 1}\cdot \ldots s_n$.
+
+
+\item
+$\ddelete{i}(t) = s_1\cdot \ldots s_{i - 1}\cdot s_{i + 1}\cdot \ldots s_n$ \\
+(with the obvious special cases for $i, n \le  2$).
+
+\item
+$\permute{i}(t) = s_1\cdot \ldots s_{i+1}\cdot s_i\cdot \ldots s_n$.
+\qqed
+\end{itemize}
+%
+\end{definition}
+
+Note that this set of edit operations is closed under inversion.
+
+\begin{definition}[Membership in a string]\label{definition:string-membership}
+For a string $t = s_1\cdot s_2\cdot \ldots s_n$, we say that $s \in t$ iff $s = s_i$ for some $i \in [n]$.\qqed
+\end{definition}
+
+This use of set membership allows us to view strings also abstractly as multi-sets.  As before, however, to make the mathematical treatment less cumbersome, we will assume that each sentence occurs at most once in a string, and thus they can be abstracted as sets; this assumption will be relaxed later.
+
+\begin{definition}[Majoritarian text]\label{definition:majoritarian-drafts}
+%
+Let $D \subset \calT$ be a set of text drafts. A text draft $t \in \calT$ is a \emph{majoritarian text} of $D$ if it contains exactly the sentences which are members of the majority of the drafts in $D$; that is, if for each $s$ it holds that $s \in t$ if and only if $|\{d \in D : s \in d\}| > |D|/n$.
+
+The set of majoritarian texts of $D$ is denoted by $M_D$.\qqed
+%
+\end{definition}
+
+Similarly, the notions of \emph{weak majoritarian text} and $\textrm{weak-}M_D$ are obtained by replacing $>$  by $\ge$ in Definition \ref{definition:majoritarian-drafts}.
+
+Note that $M_D$ and $\textrm{weak-}M_D$ are indeed sets of text drafts, as permuting  the order of sentences in a text does not change its set of sentences and hence whether it is majoritarian. Furthermore, the distance between two majoritarian texts or two weak-majoritarian texts is at most $1$: They differ only in the order of their sentences, and hence can be equated with no more than $n^2$ permute operations that cost at most $1$.
+
+\begin{example}
+%
+Let $D = \{abd, bac, ba, c\}$. Then, since $a$ and $b$ are in a majority of the drafts while $c$ is in a weak-majority of the drafts, we have $M_D = \{ab, ba\}$ and $\textrm{weak-}M_D = \{abc, acb, bac, bca, cab, cba\}$.
+%
+\end{example}
+
+\begin{lemma}\label{lemma:cinmd}
+  If there is a Condorcet winner $c$ of a set of text drafts $D$, then $c \in M_D$.
+\end{lemma}
+
+\begin{proof}
+%
+Assume, by way of contradiction, that there is a Condorcet winner $c$ of $D$, albeit $c \notin M_D$. Then there are two cases to consider.
+
+In the first case, there is some $s \notin c$ such that $c$ is in at least half of the drafts of $D$. Then, consider the draft $c \cdot s$ (that is, insert $s$ to $c$) and observe that a majority of the drafts of $D$ prefer $c \cdot s$ to $c$:
+  This is so since it is possible to move $s$ to its correct place in total operation cost strictly smaller than $1$, which is the cost of inserting it. Thus, we contradict $c$ being a Condorcet-winner of~$D$.
+
+In the second case, similarly, there is some $s \in c$ such that $c$ is in less then a majority of the drafts of $D$. Then, consider the draft $c \setminus \{s\}$ (that is, delete $s$ from $c$), and notice the draft majority of $D$ which does not have $s$ prefers $c \setminus \{s\}$ over $c$:
+  This is so since it is possible to move $s$ to its correct place in total operation cost strictly smaller than $1$, which is the cost of deleting it. Thus, we contradict $c$ being a Condorcet-winner of $D$.\qqed
+%
+\end{proof}
+
+Condorcet winners sometimes do not exist in this setting, as the next example demonstrates.
+
+\begin{example}
+%
+Let $D = \{abc, bca, cab\}$; then, there is no Condorcet winner. To see this, notice that $M_D = \textrm{weak-}M_D = \{abc, bac, cab, acb, bca, cba\}$, thus, following Lemma~\ref{lemma:cinmd}, if there is a Condorcet winner, then it is one of these drafts. However, these draft constitute a Condorcet cycle: $abc \to bac \to cab \to acb \to bca \to cba \to abc$; e.g., both $abc$ and $bca$ prefer $bac$ over $cab$.
+%
+\end{example}
+
+Nevertheless, if there is a Condorcet winner, then at least we are able to compute, in polynomial time, a draft which is close to it.
+
+\begin{lemma}
+  Finding a $1$-Condorcet-winning text draft of a set $D$ can be done in polynomial time in $|D|$.
+\end{lemma}
+
+\begin{proof}
+%
+We prove the Lemma by describing a polynomial-time $1$-Condorcet-consistent algorithm:
+  The algorithm is Implicit-Vote Aggregation only on the insert and delete; thus it finds $m_D$.
+Then, notice that
+(1) $m_D \in M_D$;
+(2) the Condorcet winner is also in $M_D$ (this is the last lemma);
+(3) the distance of any two drafts in $M_D$ is at most $1$  since each permute operation costs $\frac{1}{n^2}$ and it is always possible to permute one draft to another---containing the same set of sentences---by at most $n^2$ permute operations.
+
+It follows then that our algorithm indeed runs in polynomial time in $|D|$ and is $1$-Condorcet-consistent.
+%
+\end{proof}
+
+\subsection{Second vote-aggregation step: Ordering the elected sentences}
+
+The section above resulted in a polynomial-time $1$-Condorcet-consistent algorithm; specifically, it finds a $1$-Condorcet-winning set of sentences.
+As Step 2 begins once the elected sentences are known, say $W$, we can limit each draft in $D$ to a permutation of the sentences in $W$.
+A trivial exponential-time algorithm would check all permutations of these sentences and would find a Condorcet-winning permutation, if there is one, but we question the wisdom of doing so. The reason is that the Condorcet-winning order of sentences may reflect a compromise that was not offered by any draft and hence might not make sense.
+Instead, we limit the alternative orders explored to those actually manifested in $D$, so $D$ embodies both the set of alternatives and the set of votes. Given this choice, the order of sentences in our elected text would be trivially $n$-way consistent, for $n = |W|$
+(this is so as, in this case, each possible elected text must equal at least one private draft).
+
+\udi{I am not sure who wrote the last few sentences (me?) but I don't understand them now}
+
+With this restriction, the task now reduces to finding a Condorcet winner among $D$. As we aim to select a permutation containing exactly the sentences of $W$,
+each published draft $d$ in $D$ might consist of a different set of sentences, and in particular may have only partial information regarding the ordering of the sentences in $W$, as well as irrelevant information regarding the ordering of sentences not in $W$.  To address this, we remove from each draft $d \in D$ all sentences contained not in $W$, and consider each sentence of $W$ not in $d$ as being \emph{unordered} by $d$.  Then, we can generalize the \emph{permute} operation to define a Condorcet winner.
+
+To achieve this task, we consider a novel data type, referred to as a \emph{string-set}, which is a hybrid of a string and a set:
+  A string-set can be a string when all its elements are ordered,
+  or a set when none are ordered,
+  or a hybrid, when some are ordered and some are not.
+It may be visualized as a string with additional elements still floating above it, awaiting to find their place in the string.
+
+\begin{definition}[String-set]
+  A \emph{string-set} is a pair
+  $(d, s)$
+  of a string $d$ 
+  and a set $s$ over the same alphabet.\qqed
+\end{definition}
+
+If $d$ is a published draft and $W$ is the winning set sentences of Step 1, we wish to capture the order constraints $d$ induces on members of $W$ by a string-set, which consists of a string with the members of $d$ that are also members of $W$, in their original order in $d$, and a set with the rest of $W$. This is captured by the following definition.
+
+\begin{definition}
+Let $d \in D$ be a draft and $W$ a set of sentences.
+The \emph{string-set $\{d',s\}$ derived from $d$ and $W$} is defined as follows:
+\begin{itemize}
+
+\item
+$d'$ is a string consisting of the members of $d \cap W$, where $d$ is viewed as set, preserving their relative order in $d$.
+
+\item
+$s = W \setminus d'$, where $d'$ is viewed as a set.\qqed
+
+\end{itemize}
+%
+\end{definition}
+
+\begin{example}
+%
+Consider the string $abc$ and the set $W = \{b, c, d\}$.
+Then, the string-set $abc$ induces on $W$ is  $(bc,\{d\})$.
+%
+\end{example}
+
+We consider the following unit-cost edit operations on a string-set $(d,s)$:
+(1) Permute consecutive sentences in $d$;
+(2) Move a sentence from $s$ to position $i$ in $d$, $0 \le i \le |d|$;
+(3) Move a sentence from position $i$ in $d$, $1 \le i \le |d|$ to $s$.
+
+Equipped with these edit operations,
+we apply Implicit-Vote Aggregation on the set of string-sets derived from the drafts of $D$ and $W$ obtained in Step 1.  The initial string-set is the one derived from the current common draft $c$ and $W$.  The algorithm would identify a Condorcet-winning string-set, if such exists.
+%
+The next example demonstrates that a Condorcet-winning draft is not guaranteed to exist.
+
+\begin{example}
+%
+Let $D = \{abc, acb, bac, bca, cab, cba, abc, bca, cab\}$; then, there is no Condorcet winner. To see this, observe the following Condorcet cycle: $abc \to bac \to cab \to acb \to bca \to cba \to abc$.
+%
+\end{example}
+
+Even if a Condorcet-winning string-set $(d,s)$ exists, it might still be the case that $s$ is not empty.  As the input to the next round is a string, not a string-set, members of $s$ need to be inserted into $d$.  They can be inserted in an arbitrary place in $d$, say at the end, with the expectation that participants happy with these sentences (which are  a majority for each sentence, by definition) but not with their ordering, will place them in their preferred order in the next round of the e-process. We expect that when voting on real text, once the sentences are agreed upon, their ordering would not be controversial or at least resolved easily without cycles.  
+
+To conclude, our e-process on text drafts finds a Condorcet winner among the published drafts, if one exists, where the search space of the set of sentences from which the winner is elected is unbounded, and the search space from which the winning ordering of the sentences is elected is limited to actual orderings presented (even if partially) in the drafts published by participants, with orderings underspecified by participants resolved arbitrarily.
+
+
+\section{Conclusions}
+\label{section:conclusions}
+
+We have developed a process for electing a common draft that integrates the most preferred elements (sentences and their ordering) of drafts published by participants.
+%
+Our process interleaves deliberation and voting, thus helping a community reach a common draft which is, at least, a weak Condorcet winner.
+
+Next we discuss avenues for future research. 
+
+
+\mypara{Other distances}
+%
+As different edit operations define different distances on drafts, this choice has the potential for profound implications on the elected draft. Other distances, besides the distances considered here might be worth to explore; for example, one might consider the distances described in the survey by Schiavinotoo~\cite{schiavinotto2007review}.
+
+Related, but far more ambitious, would be to consider so-called ``semantic'' distances. The idea would be to have a distance measure related to the content of each sentence, so that, intuitively, the distance between semantically-close sentences would be smaller than between sentences whose meaning is very different.
+
+
+\mypara{Other elicitation methods}
+%
+One might consider other elicitation methods, such as voters which directly vote with approvals, voters which rank drafts, etc.
+
+
+\mypara{Different aggregation approaches}
+%
+Here we took a majoritarian approach to aggregating texts, as we applied Condorcet's principle to this setting. It might be interesting to consider applying other social choice frameworks to this setting.
+
+\mypara{UI considerations}
+%
+Here we concentrated on the mathematical foundations of identifying Condorcet-winning drafts for participatory legislation. As we envision our proposal to be manifested as an application to be used by humans, UI considerations are important to tackle. The most immediate aspect to tackle seems to be the ways by which users interact with their private drafts and the common draft.
+
+One way would be to allow participants to review and either accept or reject possible changes to their private drafts as given by other drafts and/or by the common draft:
+  That is, each voter uses a text editor to propose her draft. During deliberation, in the text editor each voter can also review the other proposed drafts, e.g., for each sentence the UI would show the other possibilities proposed by other participants. Then, after a voting iteration, each participant can see the difference between her proposed draft and the current tentative draft and change accordingly if she wishes to.
+
+
+\bibliographystyle{ieeetr}
+\bibliography{bib}
+
+
+\appendix
+
+
+\section{Majoritarian sets and n-way consistency}
+
+
+We consider here $n$-way consistency, which relates the supermajority taken in our iterative process to consistency of the elected drafts.
+
+\begin{definition}[Majoritarian set]\label{definition:appendix-majoritatian-set}
+Let $D \subset \calD$ be a finite set of drafts. Then, the \emph{$\frac{n-1}{n}$-majoritarian set} of $D$, $m^n_D$, is  the set of sentences which are members of a $\frac{n-1}{n}$-majority of the drafts in $D$, $m^n_D = \{s: |d \in D : s \in d| > (n-1)|D|/n\}$.
+%
+For simple majority, $n=2$, we omit the indices and refer to the \emph{majoritarian set} of $D$, $m_D = \{s: |d \in D : s \in d| > |D|/2\}$.\qqed
+%
+\end{definition}
+
+The corresponding notions of \emph{$\frac{n-1}{n}$-weak-majoritarian set} of $D$, $\textrm{weak-}m^n_D$, \emph{weak majoritarian set} of $D$, and $\textrm{weak-}m_D$, are obtained from Definition \ref{definition:appendix-majoritatian-set} by replacing  in it $>$ by $\ge$.
+
+Notice that $m^i_D \subseteq \textrm{weak-}m^i_D$ holds for each $i \in [n]$.
+
+\begin{definition}[$n$-way consistency]
+Let $D \subset \calD$ be a finite set of drafts. A draft $c \in \calD$ is \emph{$n$-way consistent} with $D$ if for every subset $c' \subseteq c$, $|c'|=n$, there is a draft $d \in D$ for which $c' \subseteq d$.\qqed
+\end{definition}
+
+We wish to allow the elected draft to be composed piecemeal, from most-preferred components, and therefore face the danger that the outcome will not be internally consistent. As our only source of information is the voters, we must rely on them to offer consistent drafts.  If we strive for maximal consistency, then we limit our space of alternatives to those actually offered by at least one voter; we recommend doing so in the special case of ordering the elected sentences within a draft (see below).  In general, however, this may be too restrictive, and hence when electing the set of sentences we settle for $2$-way consistency, which comes for free as a natural consequence of relying on a simple majority (see below).
+
+The proof of the following lemma, which shows a relation between majoritarian sets and $n$-way consistency, follows by a counting argument.
+
+\begin{lemma}[$(n - 1)/n$-weak-majoritarian $\rightarrow$ $n$-way consistency]\label{lemma:wm-nwc}
+  Let $D \subset \calD$ be a finite set of drafts. The \emph{$\frac{n-1}{n}$-weak-majoritarian set} of $D$, $\textrm{weak-}m^n_D$, is $n$-ways consistent with $D$. In particular, $\textrm{weak-}m_D$ is pairwise consistent with~$D$.
+\end{lemma}
+
+\begin{proof}
+%
+Assume some ordering on the drafts of $D$, say $D = \{D_1, \ldots, D_{|D|}\}$.
+%
+Consider a subset $c' \subseteq m^n_D$ of the $\frac{n-1}{n}$-majoritarian set, where $|c'| = n$, and consider some ordering of the sentences of $c'$, say $c' = \{c'_1, \ldots, c'_n\}$.
+%
+Let $M = m_{ij}$, $i \in [|D|]$, $j \in [n]$, be a binary matrix where $m_{ij}$ is $1$ if $c'_j$ is present in $D_i$ (i.e., if $c'_j \in D_i$, and $0$ otherwise (if $c'_j \notin D_i$).
+
+Since each sentence in $m^n_D$ is present in more than $\frac{n-1}{n}|D|$ drafts, it means that in total, the number of $1$'s in $M$ is more than $(n-1)|D|$  (i.e., $\sum_{i \in [|D|]} \sum_{j \in [n]} m_{ij} > (n - 1)|D|$).
+
+Now, assume towards a contradiction that $m^n_D$ is not $n$-way consistent; thus, there is no draft $D_i$ for which $c' \subset D_i$. This means that in each row of $M$ there are at most $n - 1$ cells with $1$ (i.e., for each $i \in [|D|]$, it holds that $\sum_{j \in [n]} m_{i,j} \leq n - 1$), thus in total the number of $1$s in $M$ is at most $(n - 1)|D|$ (i.e., $\sum_{i \in [|D|]}\sum_{j \in [n]} m_{i,j} \leq (n - 1)|D|$); thus, we arrive to a contradiction.
+%
+\end{proof}
+
+The following is implied since $m^n_D \subseteq \textrm{weak-}m^n_D$.
+
+\begin{corollary}
+  Let $D \subset \calD$ be a finite set of drafts. The \emph{$\frac{n-1}{n}$-majoritarian set} of $D$, $m^n_D$, is $n$-ways consistent with $D$. In particular, $m_D$ is pairwise consistent with~$D$.
+\end{corollary}
+
+
+\section{Model}\label{section:model}
+
+Here we consider drafts, edit operations, voting and sybil resilience in the abstract.  We then show how to instantiate this abstract framework to  the key tasks of democracy -- elections, legislation and budgeting.
+
+
+\subsection{Sybil-Resilient Iterated Approval Voting}
+
+
+\subsection{Drafts, distance, preference and supermajorities}
+
+\begin{definition}[Drafts, edit-distance]
+%
+We assume a potentially infinite set of \emph{drafts}, $\calD$, and a given set of \emph{edit operations} on drafts, $E: \calD \rightarrow \calD$. Each edit operation $e \in E$ has a \emph{cost}, $\cost(e) > 0$,  which is additive, so for any $E' \subset E$, $\cost(E') = \sum_{e \in E'} \cost(e)$. The draft resulting from applying an edit operation $e \in E$ on  $c \in \calD$ is denoted by $e(c)$.  The \emph{edit distance} between two drafts $c, c' \in \calD$, $\dist(c, c')$, is the minimal cost $\sum_{i \in [n]} \cost(e_i)$ of any finite sequence of edit operations $e_1, e_2, \ldots e_n$, $n \ge 0$, that convert $c$  to $c'$, $e_n(\ldots(e_2(e_1(c)))\ldots) = c'$.\qqed  
+%
+\end{definition}
+
+This model is an instance of Distance-based Reality-aware Social Choice~\cite{realsoc}, where voters preferences are determined by the edit-distances implied by their published drafts:  A published draft prefers a close draft over a distant draft.
+
+\begin{definition}[Prefers]\label{lemma:prefers}
+%
+Let $d, c, c' \in \calD$ be drafts.  We say that  $d$ \emph{prefers}  $c$ to $c'$, $ c \prefers{d} c'$, if $\dist(d, c) < \dist(d, c')$.\qqed
+\end{definition}
+
+
+For the rest of the paper, $\delta$ is a constant satisfying $0 \le \delta < \frac{1}{2}$.
+
+\begin{definition}[$\delta$-supermajority]
+%
+Let $D \subset \calD$ be a finite set of drafts. A draft $c \in \calD$ is said to \emph{win by a $\delta$-supermajority} over draft  $c \in \calD$, if $|\{ d \in D : c \prefers{d} c' \}|  > (\frac{1}{2}+\delta) |D|$.
+
+
+A draft \emph{wins by a simple majority} if it wins by a $0$-supermajority.
+%
+\qqed\end{definition}
+
+
+\section{Committee Elections}
+
+Take part of voting with sets from legislation paper.
+Discuss what kind of voting systems we can support.
+Electing a single Condorcet winner, electing a Condorcet-winning committee using approval voting, etc.
+
+\section{e-Legislation}
+
+Here we summarize the results of \cite{legislation} and add the sybil-resilient component.
+
+\section{e-Budgeting}
+
+A budget $B$ is a set of pairs $(b,q)$ where $b$ is an item and $q$ is its quantity, with at most one such pair for each $b$.
+Cost of all operations is 1?
+
+Operations include add and remove a pair, and change quantity of a pair.
+
+A budget is within limit $l$ if...
+
+The process assumes a limit $l$ and an initial budget within limit. If there is budget reduction compared to last year then the initial budget could be a proportional reduction of last year's budget.  If there is an increase, no need to change last year's budget.
+
+Interesting to compare this approach to our previous algorithm.
+
+Key difference is elicitation - which is much simpler/weaker here.
+But the possibility for rounds allows adjusting the vote to achieve desired impact.
+
+
+\end{document}
