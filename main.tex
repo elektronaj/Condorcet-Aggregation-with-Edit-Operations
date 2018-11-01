@@ -413,7 +413,7 @@ Following Corollary~\ref{corollary:main}, we conclude that, for this setting, th
 
 \mypara{Condorcet Aggregation}
 %
-We would like to better understand the behavior of Condorcet aggregation in this setting.
+We wish to better understand the behavior of Condorcet aggregation for this instantiation.
 
 \begin{observation}
   For this instantiation, Condorcet aggregation equals the Plurality rule.
@@ -460,7 +460,7 @@ we define the following edit operations of $\calE$:
 
 
 \mypara{Properties}
-
+%
 As before, first we consider the two properties.
 
 \begin{lemma}
@@ -511,7 +511,7 @@ It follows that $p$ is a Condorcet winner.
 
 \begin{remark}
 %
-Notice first that this example demonstrates that our Condorcet aggregation is not equal to maximizing social welfare:
+Notice that this example demonstrates that our Condorcet aggregation is not equal to maximizing social welfare:
   An aggregation algorithm aiming at maximizing social welfare would select the average of the ideal points,
   while we select the median.
 
@@ -521,40 +521,51 @@ selecting the median, as our Condorcet aggregation does, is strategyproof.
 \end{remark}
 
 
-\section{Committee Elections with Variable number of winners}
-\label{section:commiteee election}
+\section{Multiwinner Elections}\label{section:commiteee election}
+
+Here we instantiate our general model to two variants of multiwinner elections:
+  committee selection where the size of the committee to be selected is given,
+  and committee selection where the size of the committee to be selected shall be derived from the preferences themselves.
+We begin with the second model.
+
+
+\subsection{Committee Elections with Variable number of winners}
 
 Here we instantiate our general model by considering committee elections with variable number of winners; i.e., where the size of the committee is not given, but shall be decided by the aggregation method.
-
-In committee elections the goal is to elect a committee. The standard model assumes that the size of the committee is known ahead.
-Here we concentrate first on the other case, where the size of the committee is not given, but shall be derived from the voter preferences. There are some papers studying this model as well~\cite{kilgourvnw,vnw}.
-We concentrate on this model as the mathematical treatment is slightly simpler for it. In the next section we also consider the more standard model in which the size of the committee to be elected is given upfront.
-
-In our instantiation to committee elections with variable number of winners of our general framework, there is a set $A$ of alternatives, and the state space $D$ contains all of their subsets, as these are the allowed committees:
-  thus, the state space is $D = 2^A$.
-We consider two unit-cost edit operations, inserting a candidate and deleting a candidate.
-
-As a committee is simply a set of alternatives, we describe the specifics of the instantiations in this more general jargon of sets.
+In this social choice setting we have a set of alternatives $A$ and the goal is to select some subset of them as the winning committee.
 
 
-\subsection{Edit operations on sets}
+\mypara{Instantiation}
+%
+In our instantiation to this social choice setting we let the state space $\calD$ to contain all the admissible committees, so $\calD = 2^A$.
+We define $\calE$ to consist of the following edit operations, all of unit cost:
+  For each alternative $a \in A$, we define the edit operation $insert_a$ and the edit operation $delete_a$,
+  where $insert_a(d) = d \cup \{a\}$ and $delete_a(d) = d \setminus \{a\}$.
 
-\begin{definition}[Editing a set with insert and delete]
-Let $\calS$ be the set of all elements (i.e., all possible committee members) and $\calD_S$ the set of all admissable sets (i.e., possible committees), which are finite sets of elements of $\calS$,   $\calD_S = \{S: S \subset \calS, |S| < \infty\}$. The set of edit operations $E_\calS: \calD_\calS \rightarrow \calD_\calS$ contains, for each $s \in \calS$, the unit-cost operations $\iinsert{s}$ and $\ddelete{s}$, defined by
-$\iinsert{s}(d) = d \cup \{s\}$ and $\ddelete{s}(d) = d \setminus \{s\}$, for any $d \in \calD$.\qqed
-\end{definition}
 
-Indeed, $E_\calS$ is closed under inversion.
+\mypara{Properties}
+%
+This instantiation satisfies both properties.
 
 \begin{lemma}
-  $E_\calS$ is closed under inversion.
+  This instantiation is closed under inversion.
 \end{lemma}
 
 \begin{proof}
 %
-$\iinsert{s}(\ddelete{s}(d)) = d$, and $\ddelete{s}(\iinsert{s}(d)) = d$ if $s \notin d$, $\ddelete{{s'}}(\iinsert{s}(d)) = d$ if $s \in d$ $s' \notin d$, with an operation and its inverse being of equal (unit) cost.  
+For each $d \in \calD$ it holds that:
+  if $a \in d$, then $insert_a(delete_a(d)) = d$,
+  while if $a \notin d$, then $delete_a(delete_a(d)) = d$.
+Similarly,
+for each $d \in \calD$ it holds that:
+  if $a \notin d$, then $delete_a(insert_a(d)) = d$,
+  while if $a \in d$, then $insert_a(insert_a(d)) = d$.
 %
 \end{proof}
+
+
+\nimrod{I am here!!!}
+
 
 To further understand the setting, note that the edit distance among members of $\calD_S$ is the size of their symmetric difference:  $\dist(d,d') = |d \triangle d'|$ for any $d, d' \in \calD_S$. Hence,
 $d \in \calD_S$ approves the edit operation $e$ on the element $c \in \calD_S$ if $e(c) \prefers{d} c$, namely  $\dist(c, e(d)) < \dist(c, d)$, which in this case holds if $|c \triangle e(d)| < |c \triangle d|$.  This can happen either if $e = \iinsert{s}(d)$ for $s  \in c \setminus d$, or if $e = \ddelete{s}(d)$ for $s  \in d \setminus c$. 
