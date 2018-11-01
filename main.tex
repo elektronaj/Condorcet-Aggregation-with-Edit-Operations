@@ -181,7 +181,8 @@ i.e., each voter wishes that her ideal point would be elected by the aggregation
 %
 Furthermore, for each voter, we infer a ranking over all elements of the ground set $\calD$ following the metric induced via the edit operations $\calE$.
 Specifically, let $v_i$ be the ideal point of voter $i$, and let $d, d' \in \calD$ be two elements of the ground set.
-Then, we say that voter $i$ \emph{prefers} element $d$ to element $d'$ if $\dist(v_i, d) < \dist(v_i, d')$.
+Then, we say that voter $i$ \emph{prefers} element $d$ to element $d'$ if $\dist(v_i, d) < \dist(v_i, d')$,
+and we denote it by $d \prefers{i} d'$.
 In this way we infer a weak order for each voter; notice that this weak order is infinite whenever $\calD$ is infinite.
 Slightly abusing notation, we also refer to the weak order of voter $i$ as $v_i$,
 where it will be clear from the context whether we speak of the ideal point $v_i$ of voter $i$ or on her inferred weak order $v_i$.
@@ -196,12 +197,17 @@ In our setting, the Condorcet principle means the following.
 Let $\calD$ be a ground set $\calD$ and let $\calE$ be a set of edit operations.
 Let $V = \{v_1, \ldots, v_n\}$ be a set of weak orders over $\calD$ inferred by the metric induced by $\calE$ from ideal points of $n$ voters.
 An element $c \in \calD$ is a \emph{Condorcet winner} of $\calD$ if,
-for any other element $c' \in \calD$:  $|\{ d \in D : c \prefers{d} c' \}| > |\{ d \in D : c' \prefers{d} c \}|$.
+for any other element $c' \in \calD$:  $|\{ v_i \in V : c \prefers{i} c' \}| > |\{ v_i \in V : c' \prefers{i} c \}|$.
 %
 \end{definition}
 
 That is,
 a Condorcet-winner is an element $c$ of the ground set such that there is no other element $d$ of the ground set such that more voter ideal points are closer to $d$ than to $c$.
+A weak Condorcet-winner is defined similarly, but with $\geq$ and not $>$:
+  An element $c \in \calD$ is a \emph{weak Condorcet winner} of $\calD$ if,
+  for any other element $c' \in \calD$:  $|\{ v_i \in V : c \prefers{i} c' \}| \geq |\{ v_i \in V : c' \prefers{i} c \}|$.
+As the distinction between Condorcet winners and weak Condorcet winners is in essence an issue of tie breaking,
+we will usually speak of Condorcet winners, but mention this distinction whenever it bears special meaning.
 
 As we are interested in describing and studying aggregation methods,
 we say that an aggregation method is \emph{Condorcet consistent} if it elects a Condorcet winner whenever such exists.
@@ -209,148 +215,231 @@ we say that an aggregation method is \emph{Condorcet consistent} if it elects a 
 
 \section{A Simple Hill Climbing Algorithm}
 
-Next we describe a simple aggregation algorithm. 
-The algorithm maintains a current element, which can be initialized arbitrarily. Then, in each iteration it looks for an edit operation which, if done on the current element, would result in another element for which there is a voter majority which prefers it over the current element. 
+Our main aim in this paper is to instantiate our general model to several scenarios of social choice and describe aggregation methods for these instantiations which are Condorcet consistent.
+In essence, a Condorcet consistent aggregation method is a search algorithm, in that it shall consider the elements of the ground set $\calD$ and look for an element which is a Condorcet winner.
+As our model builds on edit operations, a natural search algorithm is a hill-climbing algorithm which we describe below.
+Informally, the hill climbing algorithm starts by choosing an element of $\calD$ as the current element.
+The algorithm is iterative, and in each iteration it tries to identify an edit operation $e$ which,
+if operated on the current element $d$, would result in an element $d' = e(d)$ for which more voter ideal points are closer to $d$ than vice versa.
 
-For convenience, we say that a voter approves an element if it ranks it higher than the current element; i.e., if it is closer, as defined via the metric defined via the edit operations, to its ideal point than the current element.
+To describe the algorithm formally, and for convenience,
+we say that a voter approves an element if it ranks it higher than the current element; i.e., if it is closer (with respect to the metric defined via the edit operations) to its ideal point than the current element.
+Furthermore, we say that an edit operation has majority approval, with respect to the current element, if more voters prefer the resulting element to the current than vice versa.
 
 \begin{definition}[Approves, Majority approval]
 %
-Given a set of ideal points $D$ and a current element $c \in \calD$,  we say that $d \in D$ \emph{approves} the edit operation $e$ on $c$ if it prefers $e(c)$ to $c$, namely $e(c) \prefers{d} c$.  An edit operation $e$ on $c$ has \emph{majority approval} by $D$ if $|\{d \in D : e(c) \prefers{d} c| > \frac{1}{2}{|D|}$.
+Let $\calD$ be a ground set and let $\calE$ be a set of edit operations.
+Let $V = \{v_1, \ldots, v_n\}$ be a set of ideal points over $\calD$ and let $c \in \calD$ be an element of the ground set (the current element).
+Then, voter $i$ \emph{approves} the edit operation $e$, with respect to $c$, if $\dist(v_i, e(c)) < \dist(v_i, c)$; i.e., if it ranks $e(c)$ higher than it ranks $c$.
+Furthermore, an edit operation $e$ has \emph{majority approval} by $V$, with respect to $c$, if $|\{v_i \in V : e(c) \prefers{i} c\}| > |\{v_i \in V : c \prefers{i} e(c)\}|$.
 %
 \end{definition}
 
-We are ready to describe the hill-climbing algorithm formally.
+We are ready to formally describe the hill-climbing algorithm.
 
-\begin{algorithm}[Hill-climbing Aggregation Algorithm]\label{algorithm:iva}
-With a set of edit operations $E$ on a state space $\calD$, a set of ideal points $D \subset \calD$, an initial element $c \in \calD$ that can be chosen arbitrarily, the algorithm proceeds in rounds to elect an element $w \in \calD$.   In each round, an edit operation $e \in E$, with majority-approval by $D$ is arbitrarily picked and applied to $c$, setting $c := e(c)$;
-if no such edit operation exists, then the process elects $w:=c$ and halts.
+\begin{algorithm}[The Hill-climbing Algorithm]
+%
+Let $\calD$ be a ground set,
+$\calE$ a set of edit operations,
+and $V = \{v_1, \ldots, v_n\}$ voter ideal points.
+The algorithm first chooses an element $w$ of the ground set as the \emph{current element}.
+Then, the algorithm proceeds in rounds.
+In each round, an edit operation $e \in \calE$ which is majority-approved by $V$ with respect to $w$ is arbitrarily picked and applied to $w$, setting $w := e(w)$;
+if no such edit operation exists, then the process elects $w$ and halts.
+%
 \end{algorithm}
 
-In the rest of this section we analyze this hill-climbing algorithm. Specifically, we are interested in conditions which are sufficient for it to halt, to run in certain time complexity, and to elect a Condorcet winner.
 
-First we show that the hill-climbing algorithm halts if the set of edit operations is so-called \emph{closed under inversion}.
+\subsection{Sufficient Conditions for Hill Climbing}
 
-\begin{definition}
+Generally,
+the hill climbing algorithm described above is not Condorcet consistent and is not even guaranteed to halt.
+Below we describe two properties of $\calD$ and $\calE$ for which we show that, if they hold, are sufficient for rendering the hill climbing algorithm to halt in a certain number of iterations,
+and to be Condorcet consistent. Later in the paper, where we describe several instantiations of our model,
+we will first show whether these conditions hold, and if so, we would conclude that indeed the hill climbing algorithm is a Condorcet-consistent aggregation method for the respective instantiations.
+
+The first property we consider is the following.
+
+\begin{definition}[Closeness under inversion]
 %
-A set of edit operations $E$ on $\calD$ is \emph{closed under inversion} if each edit operation $e \in E$ has an inverse $e' \in E$ such that $\cost(e') \leq \cost(e)$ and if $e(d) \ne d$ then $e'(e(d)) = d$ for any $d \in \calD$.
+A set of edit operations $\calE$ is \emph{closed under inversion} with respect to a ground set $\calD$ if for each edit operation $e \in \calE$ there is an inverse operation $e' \in \calE$
+such that the following hold:
+  (1) for each $d \in \calD$, if $e(d) \neq d$ then $e'(e(d)) = d$
+  and
+  (2) $\cost(e') \leq \cost(e)$.
 %
 \end{definition}
 
-\begin{lemma}\label{lemma:inverse}
-Let $E$ be a set of edit operations which is closed under inversion and $e \in E$ some edit operation.
-Let $D$ be a set of ideal points and $d \in D$ some element.
-Then, if $d$ is a Condorcet-winner of $D$ and $e(d)$ is not,
-then applying $e^{-1}$ to $e(d)$ has majority approval by $D$.
-\end{lemma}
-
-\begin{proof}
-%
-Since $d$ is a Condorcet-winner and $e(d)$ is not, they are distinct, hence by definition of Condorcet-winner there is a majority that prefers $d$ over $e(d)$.  This majority would approve any edit operation that takes $e(d)$ to $d$, in particular it would approve $e^{-1}$.\qqed
-%
-\end{proof}
+As it turns out, closeness under inversion is almost a sufficient condition for ensuring that the hill climbing algorithm halts.
 
 \begin{lemma}\label{lemma:stops}
-If the set of edit operations $E$ is closed under inversion then Algorithm~\ref{algorithm:iva} halts.
+If the set of edit operations $\calE$ is closed under inversion with respect to a ground set $\calD$ and the cost of the cheapest operation is some $\epsilon > 0$,
+then the hill climbing algorithm halts in at most $\epsilon^{-1} \cdot \sum_{v_i \in V} \dist(v_i, c)$ iterations.
 \end{lemma}
 
 \begin{proof}
 %
-We show that the sum of distances between all ideal points $D$ to the current element maintained by Algorithm~\ref{algorithm:iva} decreases in each iteration. Since this sum cannot be negative, the process cannot continue indefinitely. Consider an iteration in which the current element is $c$ and an edit operation $e \in E$ is chosen, and let us investigate the effect of $e$ on $\sum_{d \in D} \dist(d, c)$.
-%
-Let $D^-$ be the set of ideal points that approve $e$ (since it decreases their distance to $c$), $D^- = \{d \in D: e(c) \prefers{d} c\}$,  and let $D^+$ be the set of ideal points that do not approve $e$, $D^+ = D \setminus D^-$. Since $e$ has an inverse with the same cost, it can increase the distance between $c$ and any $d \in D$ by at most $\cost(e)$.
-Hence,  $D^+$ may contribute a distance increase of at most $|D^+| \cdot \cost(e)$, whereas  $D^-$  contributes a distance decrease of exactly $|D^-| \cdot \cost(e)$. 
-Since $e$ is majority-approved, $|D^-| > |D^+|$.   Hence  $\sum_{d \in D} (\dist(d, e(c)) -\dist(d,c)) \le |D^+| \cdot \cost(e) -  |D^-| \cdot \cost(e)  = (|D^+| - |D^-|) \cdot \cost(e) \le  -\cost(e) < 0$.  The sum of the distances indeed decreases in each iteration by and therefore the algorithm halts.
+We show that for any set of voter ideal points $V$ and any initial current element $c$, the hill climbing algorithm halts.
+To this end, we concentrate on the sum of distances between all ideal points $V$ to the current element $c$ maintained by the hill climbing algorithm, i.e., $\sum_{v_i \in V} \dist(v_i, c)$,
+and show that it decreases in each iteration. Since this sum cannot be negative, it follows that the process cannot continue indefinitely.
+
+So,
+consider an iteration in which the current element is $c$ and some edit operation $e \in \calE$ is chosen, and let us investigate the effect of $e$ on $\sum_{v_i \in V} \dist(v_i, c)$.
+Let $V^- = \{v_i \in V : e(c) \prefers{i} c\}$ be the set of voters that approve $e$ (i.e., those voters whose ideal points are closer to $e(c)$ than to $c$),
+and let $V^+ = \{v_i \in V : c \prefers{i} e(c)\}$ be the set of voters that do not approve $e$ (i.e., those voters whose ideal points are closer to $c$ than to $e(c)$).
+Since $e$ has an inverse with at most the same cost, it can increase the distance between $c$ and any $v_i \in V^+$ by at most $\cost(e)$.
+Hence,  $V^+$ may contribute a distance increase of at most $|V^+| \cdot \cost(e)$, whereas  $V^-$ contributes a distance decrease of exactly $|V^-| \cdot \cost(e)$. 
+Since $e$ is majority-approved, $|V^-| > |V^+|$.
+Hence, $\sum_{v_i \in V} (\dist(v_i, e(c)) - \dist(v_i,c)) \leq |V^+| \cdot \cost(e) -  |V^-| \cdot \cost(e)  = (|V^+| - |V^-|) \cdot \cost(e) \le  -\cost(e) < \epsilon$.
+
+We conclude that the sum of distances between all voter ideal points and the current element indeed decreases by at least $\epsilon$ in each iteration thus the claim follows.
 %
 \end{proof}
 
-The proof above also implies the following corollary, as it shows in particular that in each round the total cost decreases by at least the cost of the cheapest edit operation.
-
-\begin{corollary}
-  If the set of edit operation $E$ is closed under inversion and the cheapest edit operation costs $\epsilon$ then the number of rounds of the hill-climbing algorithm is at most $\epsilon^{-1} \cdot \sum_{d \in D} \dist(d, c)$, where $c$ is the initial element. 
-\end{corollary}
-
-We consider another property of sets of edit operations, namely lack of a local maximum. This property would be helpful in investigating the output of the hill-climbing algorithm.
-
-\nimrod{This is actually not a property of the set of edit operations, but a property of the whole ``setting''. Say that, a ``setting'' is a tuple ($\calD, E$).}
-
-\begin{definition}
+\begin{remark}
 %
-A set of edit operations $E$ is \emph{free of local maxima} if it holds that for any set of ideal points $D \subset \calD$ that has a Condorcet-winner and any draft $c \in \calD$, either $c$ is a Condorcet-winner of $D$ or $c$ has an edit operation $e \in E$ with majority approval by $D$.
+The proof above has arguably some flavor of a welfare maximizing algorithm:
+  In our setting, a reasonable aggregation algorithm--specifically, a welfare maximizing algorithm--would aim at identifying an element $d$ of the ground set $\calD$ which minimizes the sum of distances
+  from the voter ideal points to $d$.
+Notice that in this paper we do not consider such aggregation methods, and that a Condorcet consistent aggregation algorithm has a different goal than a welfare maximizing algorithm.
+In later sections we provide a simple example demonstrating this difference.
+%
+\end{remark}
+
+The second property we consider is the following.
+While the first property, of closeness under inversion, is useful to ensure that the hill climbing algorithm merely halts in a certain number of steps,
+the second property, defined below, is useful to ensure that the output of the hill climbing algorithm is indeed a Condorcet winner, if such exists.
+
+\begin{definition}[Freeness from local maxima]
+%
+A set of edit operations $\calE$ is \emph{free of local maxima} with respect to a ground set $\calD$ if it holds that for any set of voter ideal points $V$ that has a Condorcet-winner
+and any element $c \in \calD$, either $c$ is a Condorcet-winner for $V$ or there is an edit operation $e \in \calE$ which is majority approved by $V$ with respect to $c$.
 %
 \end{definition}
 
-Next we show that the hill-climbing algorithm is Condorcet-consistent under the above conditions. The proof follows the fact that the hill-climbing algorithm is in essence a local search algorithm, and so, if the set of edit operations is free of local maxima, then a local search would find the global maximum.
+Indeed, freeness from local maxima is almost a sufficient condition for ensuring that the hill climbing algorithm picks a Condorcet winner.
 
 \begin{lemma}\label{lemma:IIAV-epsilon-condorcet}
-If the set of edit operations $E$ is closed under inversion and free of local maxima then Algorithm~\ref{algorithm:iva} is Condorcet-consistent.
+  Let $\calE$ be a set of edit operations and $\calD$ be a ground set.
+  Let $V$ be voter ideal points such that there is a Condorcet winner $c \in \calD$ for $V$.
+  If $\calE$ is free from local maxima with respect to $\calD$ and the hill climbing algorithm halts,
+  then the output of the hill climbing algorithm is $c$.
 \end{lemma}
 
 \begin{proof}
 %
-We need to show that Algorithm \ref{algorithm:iva} elects a Condorcet-winner assuming $D$ has a Condorcet-winner and $E$ is closed under inversion and is free of local maxima.
-Since $E$ is closed under inversion, the process halts according to Lemma \ref{lemma:stops}.  Let $w$ be the element it elects before it halts and assume, by way of contradiction, that $w$ is not a Condorcet-winner of $D$.  Since $E$ has no local maxima then, by definition, there is an edit operation $e \in E$ to $w$ with majority approval by $D$.  This violates the termination condition of the algorithm and hence it cannot elect $w$ and halt, a contradiction.   Therefore, the element $w$ is a Condorcet-winner.\qqed
+Let $w$ be the current element maintained by the hill climbing algorithm right before it halts.
+By way of contradiction, assume that $w$ is not a Condorcet-winner for $V$.
+As $\calE$ has no local maxima, it follows that there is an edit operation $e \in \calE$ to $w$ with majority approval by $V$.
+This violates the termination condition of the hill climbing algorithm; hence, a contradiction.
+We conclude that $w$ is a Condorcet-winner.
 %
 \end{proof}
 
-Combining the results above, we have the following.
+Combining the two results above, we have the following.
 
-\begin{corollary}\label{corollary:IIAV--condorcet}
-If the set of edit operations $E$ is closed under inversion, free of local maxima, then Algorithm \ref{algorithm:iva} is Condorcet-consistent.
+\begin{corollary}\label{corollary:main}
+If the set of edit operations $\calE$ is closed under inversion and free of local maxima with respect to the ground set $\calD$,
+and the cost of the cheapest edit operation $e \in \calE$ is some $\epsilon > 0$,
+then the hill climbing algorithm is a Condorcet-consistent aggregation method.
 \end{corollary}
 
 \begin{proof}
 %
-As $E$ is closed under inversion, the hill-climbing algorithm halts. As $E$ is free of local maxima, it halts on a Condorcet-winner if such exists.\qqed
+As $\calE$ is closed under inversion with respect to $\calD$ and the cheapest edit operation costs $\epsilon > 0$,
+Lemma~\ref{lemma:stops} implies that the hill-climbing algorithm halts.
+As $\calE$ is free of local maxima with respect to $\calD$,
+Lemma~\ref{lemma:IIAV-epsilon-condorcet} implies that it returns a Condorcet winner whenever it exists.
 %
 \end{proof}
 
-
-\section{Instances of the General Model}
-
-After the introduction of our general framework and algorithm and the conditions on the edit operations that render our algorithm Condorcet-consistent according to our definition, next we consider instances of this framework for certain social choice tasks:
-  Single-winner elections,
-  committee elections,
-  line budgeting,
-  and legislation.
-  
 
 \section{Single-winner Elections}
 
-In the setting of single-winner elections, there is an underlying set of alternatives $A = \{a_1, \ldots, a_m\}$ thus, viewed in our model, the state space contains exactly the set $A$. Then, an ideal point of each voter is merely her most-preferred alternative.
+We are ready to consider several instantiations of the general model to specific social choice settings.
+In this section we consider two variants of single-winner elections and describe their corresponding instantiations of the general model.
+We first describe the specific instantiation,
+by defining the ground set $\calD$ and the set of edit operations $\calE$.
+Then we show that, for these $\calD$ and $\calE$,
+indeed closeness under inversion and freeness from local maxima indeed holds,
+thus we conclude that the hill climbing algorithm is a Condorcet consistent aggregation algorithm from this setting.
+Finally, we investigate its operation in this setting and observe that it is equal to the Plurality rule.
 
-In the most basic setting, there is no structure between the alternatives, thus no structure between the elements of the state space, thus the most basic set of edit operations $E$ we consider contains only one edit operation:
-  \emph{replace(D, a)}:
-    This edit operation, of cost $1$, when applied to an element $D$, returns the element $a$.
 
-Let us first check whether inversion, closeness and freedom of local maxima hold.
+\subsection{General Single-winner Elections}
+
+Here we consider the standard, general model of single-winner elections and describe an instantiation of our general model to it.
+
+
+\subsubsection{Instantiation}
+
+The standard model of single-winner elections consists of a set of alternatives and a set of voters with preferences the task is to aggregate voter preferences over these alternatives.
+The task is to aggregate these preferences and select one alternative is a winner.
+As the set of possible outcomes of a single-winner election is exactly $A$, in our instantiation of the general model to this setting we let $\calD = A$.
+In particular, it means that a voter ideal points can be viewed as her most-preferred alternative.
+
+As in the general setting of single-winner elections there is no structure or dependencies between the alternatives of $A$,
+we do not wish to have any particular structure between the elements of the ground set $\calD$,
+thus we consider the following basic set of edit operations $\calE$:
+  For each alternative $a \in A$, we have a unit-cost edit operation $swap_a$ such that
+  $swap_a(d) = a$ for each $d \in \calD$.
+That is, for any ideal point $d \in \calD$, applying $swap_a$ on $d$ results in changing $d$ to become $a$.
+
+
+\subsubsection{Properties}
+
+For this instantiation, both properties hold.
 
 \begin{lemma}
-  $E$ is closed under inversion and free of local maxima.
+  For this instantiation, closeness under inversion and freeness from local maxima hold.
 \end{lemma}
 
 \begin{proof}
 %
-Closeness under inversion holds as, for each $D$ in the state space and for each $a$ it holds that:
-  $replace(replace(D, a), D) = D$.
-  
-To see why freedom of local maxima holds, assume that $c$ is the Condorcet winner and $d$ is not. Then, it means that there is a voter majority that prefer $c$ to $d$. Then, this voter majority would approve the edit operation $replace(d, c)$.\qqed
+Closeness under inversion holds as, for each $d \in \calD$ and for each $a \in A$ it holds that:
+  $swap_d(swap_a(d) = d$.
+
+To see why freedom of local maxima holds, assume that $c$ is the Condorcet winner and $d$ is not.
+It follows that there is a voter majority that prefer $c$ to $d$. This voter majority approves the edit operation $swap_c(d)$.
 %
 \end{proof}
 
-We conclude that, for this setting, our hill-climbing algorithm is Condorcet consistent.
+Following Corollary~\ref{corollary:main}, we conclude that, for this setting, the hill climbing algorithm is Condorcet consistent.
 
 \begin{corollary}
-  For this setting, our hill-climbing algorithm is Condorcet consistent.
+  For this instantiation, the hill climbing algorithm is Condorcet consistent.
 \end{corollary}
 
-Next we would like to understand what is the behavior of our aggregation method. It turns our that, for this simple setting, our method is simply Plurality:
-  The Plurality voting rule elects as a winner the alternative which is ranked first by the most voters.
-Consider the Plurality winner of an election $p$. And consider our definition of Condorcet consistency. Then, for any other element in the state space $c \neq p$, there are more voters preferring $p$ over $c$ than vice versa, as for each voter whose ideal point is $p$ (i.e., rank $p$ first), the distance to $p$ is $0$ but the distance to $c$ is $1$. Then, as there are more voters whose ideal point is $p$ than those of $c$, it follows that $p$ would be a Condorcet winner according to our definition.
+
+\mypara{Condorcet Aggregation}
+%
+We would like to better understand the behavior of Condorcet aggregation in this setting.
 
 \begin{observation}
-  For this setting, our method is Plurality.
+  For this instantiation, Condorcet aggregation equals the Plurality rule.
 \end{observation}
+
+\begin{proof}
+%
+For this instantiation, voter $i$ provides an alternative $a \in A$ as her ideal point,
+and, following the edit operations of $\calE$, the inferred weak order $v_i$ for voter $i$ whose ideal point is $a$ is a dichotomous weak order $v_i : a \pref A \setminus \{a\}$
+(this is so as the distance between the ideal point of $i$, namely $a$, to any other element of the ground set is $1$, whereas it has distance $0$ to itself).
+Consider a Plurality winner $p$ of this election,
+namely an alternative which is ranked first by most voters,
+and consider some other element of the ground set $d \neq p$.
+As the weak orders of the voters are dichotomous exactly as specified above, and as $p$ appears on top in at least as many weak orders as $d$,
+it follows that there is no voter majority preferring $d$ to $p$.
+Thus, we conclude that $p$ is a Condorcet winner.
+%
+\end{proof}
+
+\begin{remark}
+%
+Indeed, finding the Plurality winner can be done simply by counting how many voters place their ideal points on each of the alternatives.
+The hill climbing algorithm finds the Plurality winner in this instantiation by at most $|A|$-many iterations,
+where in each iteration its current element is an alternative with a higher Plurality score than the previous current element.
+%
+\end{remark}
 
 
 \section{One-dimensional Domains}
@@ -370,14 +459,14 @@ As before, first we consider the two properties of $E$.
 %
 Closed under inversion because $inc(dec(d)) = d$ and $dec(inc(d)) = d$.
 
-Free of local maxima as if $d$ is not Condorcet winner then the Condorcet winner is either larger (as a natural number) or smaller. If it is larger than there is majority approval for $inc(d)$ and if it is smaller than for $dec(d)$.
+Free of local maxima holds as if $d$ is not Condorcet winner then the Condorcet winner is either larger (as a natural number) or smaller. If it is larger than there is majority approval for $inc(d)$ and if it is smaller than for $dec(d)$.
 %
 \end{proof}
 
 So, we have the following.
 
 \begin{corollary}
-  For this setting, hill-climbing is Condorcet consistent.
+  For this setting, the hill climbing algorithm is Condorcet consistent.
 \end{corollary}
 
 So what is our method for this setting? It is the median! It selects the median of the ideal points.
